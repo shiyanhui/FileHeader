@@ -1,6 +1,84 @@
 {
-    "date" : "%Y-%m-%d %H:%M:%S",
-    "author": "Your Name",
-    "email": "you@example.com",
-    "link": "http://example.com"
+    "options": {
+        // FileHeader judges programming language according file suffix.
+        //
+        // Default programming language if FileHeader judges failed when you
+        // create new file.
+        "syntax_when_not_match": "Text",
+        // Whether enable variable `create_time`. If false the variable 
+        // `create_time` won't work. 
+        "create_time": true,
+        // Whether enable variable `modified_time`. If false the variable 
+        // `modified_time` won't work. 
+        // If enable it, it will update {{ modified_time }} every time you
+        // save file.
+        "modified_time": true,
+        // The datetime format.
+        // 0: "%Y-%m-%d %H:%M:%S"
+        // 1: "%Y-%m-%d"
+        // 2: "%H:%M:%S"
+        "time_format": 0,
+        // Set your custom template path here, it is a directory. In it you 
+        // write your own .tmpl files. The file name should be a language, 
+        // "Python.tmpl" for example. FileHeader will search your custom path
+        // prior, and FileHeader will use the default .tmpl file if fail.
+        "custom_template_path": "",
+    },
+    // The default variables you render.
+    "Default": {
+        // Author 
+        "author": "Your Name",
+        // Email
+        "email": "email@example.com",
+        // You can add more here......
+    },
+    // You can set different variables in different languages. It will cover 
+    // that in "Default".
+    "ASP": {},
+    "ActionScript": {},
+    "AppleScript": {},
+    "Batch File": {},
+    "C#": {},
+    "C++": {},
+    "CSS": {},
+    "Clojure": {},
+    "Color Scheme - Default": {},
+    "D": {},
+    "Diff": {},
+    "Erlang": {},
+    "Go": {},
+    "Graphviz": {},
+    "Groovy": {},
+    "HTML": {},
+    "Haskell": {},
+    "Java": {},
+    "JavaScript": {},
+    "LaTeX": {},
+    "Language - English": {},
+    "Lisp": {},
+    "Lua": {},
+    "Makefile": {},
+    "Markdown": {},
+    "Matlab": {},
+    "OCaml": {},
+    "Objective-C": {},
+    "PHP": {},
+    "Pascal": {},
+    "Perl": {},
+    "Python": {},
+    "R": {},
+    "Rails": {},
+    "Regular Expressions": {},
+    "RestructuredText": {},
+    "Ruby": {},
+    "SQL": {},
+    "Scala": {},
+    "ShellScript": {},
+    "TCL": {},
+    "Text": {},
+    "Textile": {},
+    "Theme - Default": {},
+    "Vintage": {},
+    "XML": {},
+    "YAML": {},
 }
