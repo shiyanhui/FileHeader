@@ -10,6 +10,7 @@
         "keys": ["ctrl+alt+a"], 
         "command": "file_header_add_header",
         "args":{
+            "paths": []
         }
     }
 ]
