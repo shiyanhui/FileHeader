@@ -63,43 +63,63 @@ def get_syntax_type(name, syntax_type='Text'):
 def get_syntax_file(syntax_type):
     return 'Packages/%s/%s.tmLanguage' % (syntax_type, syntax_type)
 
+def block(view, callback, *args, **kwargs):
+    '''Ensure the callback is executed'''
+
+    def _block():
+        if view.is_loading():
+            sublime.set_timeout(_block, 100)
+        else:
+            callback(*args, **kwargs)
+    _block()
 
 class FileHeaderNewFileCommand(sublime_plugin.WindowCommand):
-    def on_done(self, paths, name):
-        if not name:
-            return 
-
-        syntax_type = get_syntax_type(name)
-        header = render_template(syntax_type)
-        
-        if not paths:
-           new_file = Window().new_file()
-           new_file.set_name(name)
-           new_file.run_command('insert', {'characters': header})
-           new_file.set_syntax_file(get_syntax_file(syntax_type))
-           return
-
-        path = paths[0]
-        if(os.path.isdir(path)):
-            file_name = os.path.join(path, name)
-        else:
-            file_name = os.path.join(os.path.dirname(path), name)
-
-        if os.path.exists(file_name):
+    def new_file(self, path, syntax_type):
+        if os.path.exists(path):
             sublime.error_message('File exists!')
             return
 
+        header = render_template(syntax_type)
+
         try:
-            with open(file_name, 'w+') as f:
+            with open(path, 'w+') as f:
                 f.write(header)
                 f.close()
         except Exception as e:
             sublime.error_message(e)
             return
 
-        new_file = Window().open_file(file_name)
-        new_file.set_syntax_file(get_syntax_file(syntax_type))
+        new_file = Window().open_file(path)
+        block(new_file, new_file.set_syntax_file, get_syntax_file(syntax_type))
 
+    def on_done(self, paths, name):
+        if not name:
+            return 
+
+        syntax_type = get_syntax_type(name)
+        
+        if not paths:
+            current_view = Window().active_view()
+            if current_view:
+                file_name = current_view.file_name()
+                path = os.path.join(os.path.dirname(file_name), name)
+                self.new_file(path, syntax_type)
+            else:
+                header = render_template(syntax_type)
+                new_file = Window().new_file()
+                new_file.set_name(name)
+                new_file.run_command('insert', {'characters': header})
+                new_file.set_syntax_file(get_syntax_file(syntax_type))
+            return
+
+        path = paths[0]
+        if(os.path.isdir(path)):
+            path = os.path.join(path, name)
+        else:
+            path = os.path.join(os.path.dirname(path), name)
+
+        self.new_file(path, syntax_type)
+        
     def run(self, paths=[]):
         Window().run_command('hide_panel')
         Window().show_input_panel(caption='File Name:', initial_text='', 
@@ -118,14 +138,8 @@ class AddFileHeaderCommand(sublime_plugin.TextCommand):
 class FileHeaderAddHeaderCommand(sublime_plugin.WindowCommand):
     def add(self, path):
         modified_file = Window().open_file(path)
-
-        def _add():
-            if modified_file.is_loading():
-                sublime.set_timeout(_add, 100)
-            else:
-                modified_file.run_command('add_file_header', 
-                                          {'path': path})
-        _add()
+        block(modified_file, modified_file.run_command, 
+              'add_file_header', {'path': path})
 
     def walk(self, path):
         for root, subdirs, files in os.walk(path):
@@ -149,13 +163,11 @@ class FileHeaderAddHeaderCommand(sublime_plugin.WindowCommand):
             self.walk(path)
 
     def run(self, paths=[]):
-        if paths:
-            initial_text = os.path.abspath(paths[0])
-        else:
-            initial_text = Window().active_view().file_name()
+        initial_text = (os.path.abspath(paths[0]) if paths else 
+                        Window().active_view().file_name())
 
         Window().run_command('hide_panel')
-        Window().show_input_panel(caption='File or Directory:', 
+        Window().show_input_panel(caption='Modified File or Directory:', 
                                   initial_text=initial_text, 
                                   on_done=self.on_done, on_change=None,
                                   on_cancel=None)
