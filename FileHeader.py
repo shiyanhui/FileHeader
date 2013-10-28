@@ -10,26 +10,44 @@ from datetime import datetime
 
 ROOT_PATH = os.path.abspath(os.path.dirname(__file__))
 TEMPLATE_PATH = ROOT_PATH + '/template/'
+PLUGIN_NAME = 'FileHeader'
 
 sys.path.insert(0, ROOT_PATH)
 
 def Window():
+    '''Get current active window'''
+
     return sublime.active_window()
 
+def Settings():
+    '''Get settings'''
+
+    return sublime.load_settings('%s.sublime-settings' % PLUGIN_NAME)
+
 def get_template(syntax_type):
+    '''Get template correspond `syntax_type`'''
+
     template_file = open('%s%s.tmpl' % (TEMPLATE_PATH, syntax_type), 'r')
     contents = template_file.read() + '\n'
     template_file.close()
     return contents
 
 def render_template(syntax_type):
+    '''Render the template correspond `syntax_type`'''
+
     from jinja2 import Template
     template = Template(get_template(syntax_type))
-    render_string = template.render({'author': 'Lime', 
-                                     'date': datetime.now() })
+    args = Settings().get('default')
+    args.update(Settings().get(syntax_type, {}))
+    render_string = template.render(args)
     return render_string
 
-def get_syntax_type(name, syntax_type='Text'):
+def get_syntax_type(name):
+    '''Judge `syntax_type` according to to `name`'''
+
+    options = Settings().get('options')
+    syntax_type = options['syntax_when_not_match']
+
     name = name.split('.')
     if len(name) <= 1:
         return syntax_type
@@ -61,6 +79,8 @@ def get_syntax_type(name, syntax_type='Text'):
     return syntax_type
 
 def get_syntax_file(syntax_type):
+    '''Get syntax file path'''
+
     return 'Packages/%s/%s.tmLanguage' % (syntax_type, syntax_type)
 
 def block(view, callback, *args, **kwargs):
@@ -74,6 +94,8 @@ def block(view, callback, *args, **kwargs):
     _block()
 
 class FileHeaderNewFileCommand(sublime_plugin.WindowCommand):
+    '''Create a new file with header'''
+
     def new_file(self, path, syntax_type):
         if os.path.exists(path):
             sublime.error_message('File exists!')
@@ -128,6 +150,8 @@ class FileHeaderNewFileCommand(sublime_plugin.WindowCommand):
 
 
 class AddFileHeaderCommand(sublime_plugin.TextCommand):
+    '''Command: add `header` in a file'''
+
     def run(self, edit, path):
         syntax_type = get_syntax_type(path)
         header = render_template(syntax_type)
@@ -136,12 +160,18 @@ class AddFileHeaderCommand(sublime_plugin.TextCommand):
 
 
 class FileHeaderAddHeaderCommand(sublime_plugin.WindowCommand):
+    '''Conmmand: add `header` in a file or directory'''
+
     def add(self, path):
+        '''Add to a file'''
+
         modified_file = Window().open_file(path)
         block(modified_file, modified_file.run_command, 
               'add_file_header', {'path': path})
 
     def walk(self, path):
+        '''Add files in the path'''
+        
         for root, subdirs, files in os.walk(path):
             for f in files:
                 file_name = os.path.join(root, f)
