@@ -18,8 +18,10 @@ def Window():
 
 def refresh():
     try:
-        sublime.set_timeout(lambda:sublime.active_window().run_command('refresh_folder_list'), 200);
-        sublime.set_timeout(lambda:sublime.active_window().run_command('refresh_folder_list'), 1300);
+        sublime.set_timeout(lambda:sublime.active_window().run_command(
+                            'refresh_folder_list'), 200);
+        sublime.set_timeout(lambda:sublime.active_window().run_command(
+                            'refresh_folder_list'), 1300);
     except:
         pass
 
