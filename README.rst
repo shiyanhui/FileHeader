@@ -53,7 +53,7 @@ Create a new file
 
 - Sidebar menu
 
-    .. image:: ./doc/source/_static/new%20file%20sidebar.gif
+    .. image:: ./doc/new%20file%20sidebar.gif
 
 - Shortcuts    
 
@@ -64,7 +64,7 @@ Add header to an existed file
 
 - Sidebar
 
-    .. image:: ./doc/source/_static/add%20header%20sidebar.gif
+    .. image:: ./doc/add%20header%20sidebar.gif
 
 - Shortcuts
 
@@ -73,7 +73,7 @@ Add header to an existed file
 Add header to files in the specified directory
 ----------------------------------------------
 
-    .. image:: ./doc/source/_static/add%20header%20in%20dir.gif
+    .. image:: ./doc/add%20header%20in%20dir.gif
 
 A very important feature of FileHeader is that it can automic update last modified time of file. Just look this picture, take care of the **@Last modified:** before save and after save: 
 
@@ -83,9 +83,9 @@ A very important feature of FileHeader is that it can automic update last modifi
 Settings
 ========
 
-There are three kind of settings, **options**, **Default** and kinds of languages variables.
+There are three kinds of arguments, **options**, **Default** and kinds of languages variables settings. **options** is the functional setting, *Default* is the default language variables settings.
 
-.. code-block:: json:
+.. code-block:: c++
     
     {
         "options": {
