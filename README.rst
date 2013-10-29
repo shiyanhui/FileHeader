@@ -36,11 +36,11 @@ Create a new file with project info
 
 - From the sidebar 
 
-    .. image:: https://github.com/shiyanhui/FileHeader/blob/master/doc/source/_static/new%20file%20sidebar.gif
+    .. image:: ./doc/source/_static/new%20file%20sidebar.gif
 
 - Shortcuts    
 
-    .. image:: https://github.com/shiyanhui/FileHeader/blob/master/doc/source/_static/new%20file%20shortcuts.gif
+    .. image:: ./doc/source/_static/new%20file%20shortcuts.gif
 
     The shortcuts is `super+alt+n` on OS X, `ctrl+alt+n` on Windows and Linux.
 
@@ -49,20 +49,20 @@ Add header to an existed file
 
 - From the sidebar
 
-    .. image:: https://github.com/shiyanhui/FileHeader/blob/master/doc/source/_static/add%20header%20sidebar.gif
+    .. image:: ./doc/source/_static/add%20header%20sidebar.gif
 
 - Shortcuts
 
-    .. image:: https://github.com/shiyanhui/FileHeader/blob/master/doc/source/_static/add%20header%20shortcuts.gif
+    .. image:: ./doc/source/_static/add%20header%20shortcuts.gif
 
     The shortcuts is `super+alt+a` on OS X, `ctrl+alt+a` on Windows and Linux.
 
 Add header to files in specified directory
 ------------------------------------------
 
-.. image:: https://github.com/shiyanhui/FileHeader/blob/master/doc/source/_static/add%20header%20in%20dir.gif
+    .. image:: ./doc/source/_static/add%20header%20in%20dir.gif
 
 
-A very important feature of FileHeader is it can automic update file last modified time. Just look this: 
+A very important feature of FileHeader is it can automic update file last modified time. Just look this, take care of the `@Last modified:` before save and after save: 
 
-.. image:: https://github.com/shiyanhui/FileHeader/blob/master/doc/source/_static/add%20header%20in%20dir.gif
+.. image:: ./doc/source/_static/update%20time.gif
