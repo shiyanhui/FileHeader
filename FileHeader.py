@@ -87,7 +87,7 @@ def render_template(syntax_type):
         template = Template(get_template(syntax_type))
         render_string = template.render(get_args(syntax_type))
     except Exception as e:
-        sublime.error_message(e)
+        # sublime.error_message(e)
         render_string = ''
     return render_string
 

@@ -77,7 +77,7 @@ Add header to files in the specified directory
 
 A very important feature of FileHeader is that it can automic update last modified time of file. Just look this picture, take care of the **@Last modified:** before save and after save: 
 
-.. image:: ./doc/source/_static/update%20time.gif
+.. image:: ./doc/update%20time.gif
 
 
 Settings
