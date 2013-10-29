@@ -266,8 +266,14 @@ class FileHeaderAddHeaderCommand(sublime_plugin.WindowCommand):
             self.walk(path)
 
     def run(self, paths=[]):
-        initial_text = (os.path.abspath(paths[0]) if paths else 
-                        Window().active_view().file_name())
+        initial_text = ''
+        if paths:
+            initial_text = os.paths.abspath(paths[0])
+        else:
+            try:
+                initial_text = Window().active_view().file_name()
+            except:
+                pass
 
         Window().run_command('hide_panel')
         Window().show_input_panel('Modified File or Directory:', initial_text, 
