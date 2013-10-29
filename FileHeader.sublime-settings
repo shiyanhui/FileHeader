@@ -1,6 +1,7 @@
 {
     "options": {
         // FileHeader judges programming language according file suffix.
+        //
         // Default programming language if FileHeader judges failed when you
         // create new file.
         "syntax_when_not_match": "Text",
@@ -38,7 +39,6 @@
     "Clojure": {},
     "Color Scheme - Default": {},
     "D": {},
-    "Default": {},
     "Diff": {},
     "Erlang": {},
     "Go": {},

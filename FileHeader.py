@@ -1,10 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# @Date: 2013-10-29 10:36:50
-# @Author: 
-# @Last modified: 2013-10-29 11:10:24
-
-# -*- coding: utf-8 -*-
+# @Date: 2013-10-29 11:28:36
+# @Author: Lime
+# @Email: shiyanhui66@gmail.com
+# @Last modified: 2013-10-29 12:55:42
 
 import sublime
 import sublime_plugin
@@ -86,20 +85,37 @@ def get_syntax_type(name):
         return syntax_type
 
     syntax_map = {
+        'as': 'ActionScript',
+        'scpt': 'AppleScript',
         'asp': 'ASP',
+        'aspx': 'ASP',
         'c': 'C++',
         'cs': 'C#',
         'cpp': 'C++',
+        'clj': 'Clojure',
         'css': 'CSS',
+        'd': 'D',
+        'erl': 'Erlang',
         'go': 'Go',
+        'hs': 'Haskell',
         'htm': 'HTML',
         'html': 'HTML',
         'java': 'Java',
         'js': 'JavaScript',
+        'tex': 'LaTeX',
+        'lisp': 'Lisp',
+        'lua': 'Lua',
+        'mat': 'Matlab',
+        'cc': 'Objective-C',
+        'pas': 'Pascal',
         'pl': 'Perl',
         'php': 'PHP',
         'py': 'Python',
         'rb': 'Ruby',
+        'scala': 'Scala',
+        'sh': 'ShellScript',
+        'sql': 'SQL',
+        'tcl': 'TCL',
         'txt': 'Text',
         'xml': 'XML',
     }
@@ -244,7 +260,7 @@ class FileHeaderReplaceCommand(sublime_plugin.TextCommand):
         self.view.replace(edit, region, strings)
 
 class UpdateModifiedTimeListener(sublime_plugin.EventListener):
-    '''Update `modified_time` when save file'''
+    '''Auto update `modified_time` when save file'''
 
     MODIFIED_REGEX = re.compile('\{\{\s*modified_time\s*\}\}') 
 
