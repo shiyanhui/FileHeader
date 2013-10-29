@@ -4,6 +4,7 @@
 import sublime
 import sublime_plugin
 import functools
+import copy
 import os
 import sys
 import re
@@ -178,6 +179,14 @@ class FileHeaderNewFileCommand(sublime_plugin.WindowCommand):
 
         new_file = Window().open_file(path)
         block(new_file, new_file.set_syntax_file, get_syntax_file(syntax_type))
+        block(new_file, new_file.show_at_center, 0)
+
+    def new_view(self, syntax_type, name):
+        header = render_template(syntax_type)
+        new_file = Window().new_file()
+        new_file.set_name(name)
+        new_file.run_command('insert', {'characters': header})
+        new_file.set_syntax_file(get_syntax_file(syntax_type))
 
     def on_done(self, paths, name):
         if not name:
@@ -189,14 +198,13 @@ class FileHeaderNewFileCommand(sublime_plugin.WindowCommand):
             current_view = Window().active_view()
             if current_view:
                 file_name = current_view.file_name()
-                path = os.path.join(os.path.dirname(file_name), name)
-                self.new_file(path, syntax_type)
+                if file_name is None:
+                    self.new_view(syntax_type, name)
+                else:
+                    path = os.path.join(os.path.dirname(file_name), name)
+                    self.new_file(path, syntax_type)
             else:
-                header = render_template(syntax_type)
-                new_file = Window().new_file()
-                new_file.set_name(name)
-                new_file.run_command('insert', {'characters': header})
-                new_file.set_syntax_file(get_syntax_file(syntax_type))
+                self.new_view(syntax_type, name)
             return
 
         path = paths[0]
@@ -209,9 +217,8 @@ class FileHeaderNewFileCommand(sublime_plugin.WindowCommand):
         
     def run(self, paths=[]):
         Window().run_command('hide_panel')
-        Window().show_input_panel(caption='File Name:', initial_text='', 
-                                  on_done=functools.partial(self.on_done, paths
-                                  ), on_change=None, on_cancel=None)
+        Window().show_input_panel('File Name:', '', functools.partial(
+                                  self.on_done, paths), None, None)
 
 
 class AddFileHeaderCommand(sublime_plugin.TextCommand):
@@ -233,6 +240,7 @@ class FileHeaderAddHeaderCommand(sublime_plugin.WindowCommand):
         modified_file = Window().open_file(path)
         block(modified_file, modified_file.run_command, 
               'add_file_header', {'path': path})
+        block(modified_file, modified_file.show_at_center, 0)
 
     def walk(self, path):
         '''Add files in the path'''
@@ -262,17 +270,15 @@ class FileHeaderAddHeaderCommand(sublime_plugin.WindowCommand):
                         Window().active_view().file_name())
 
         Window().run_command('hide_panel')
-        Window().show_input_panel(caption='Modified File or Directory:', 
-                                  initial_text=initial_text, 
-                                  on_done=self.on_done, on_change=None,
-                                  on_cancel=None)
+        Window().show_input_panel('Modified File or Directory:', initial_text, 
+                                  self.on_done, None, None)
 
 
 class FileHeaderReplaceCommand(sublime_plugin.TextCommand):
     '''Replace contents in the `region` with `stirng`'''
 
-    def run(self, edit, region, strings):
-        region = sublime.Region(region[0], region[1])
+    def run(self, edit, a, b, strings):
+        region = sublime.Region(int(a), int(b))
         self.view.replace(edit, region, strings)
 
 
@@ -317,9 +323,9 @@ class UpdateModifiedTimeListener(sublime_plugin.EventListener):
             if(_ != (-1, -1) and _ is not None):
                 region = view.find(UpdateModifiedTimeListener.time_pattern(), 
                                    _.a)
-
                 strftime = get_strftime()
                 time = datetime.now().strftime(strftime)
                 view.run_command('file_header_replace', 
-                                 {'region': (region.a, region.b), 
+                                 {'a': region.a, 
+                                  'b': region.b,
                                   'strings': time})

@@ -22,14 +22,14 @@
         // write your own .tmpl files. The file name should be a language, 
         // "Python.tmpl" for example. FileHeader will search your custom path
         // prior, and FileHeader will use the default .tmpl file if fail.
-        "custom_template_path": "",
-    },
+        "custom_template_path": ""
+    } ,
     // The default variables you render.
     "Default": {
         // Author 
         "author": "Your Name",
         // Email
-        "email": "email@example.com",
+        "email": "email@example.com"
         // You can add more here......
     },
     // You can set different variables in different languages. It will cover 
@@ -80,5 +80,5 @@
     "Theme - Default": {},
     "Vintage": {},
     "XML": {},
-    "YAML": {},
+    "YAML": {}
 }
