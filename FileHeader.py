@@ -157,6 +157,7 @@ def block(view, callback, *args, **kwargs):
             callback(*args, **kwargs)
     _block()
 
+
 class FileHeaderNewFileCommand(sublime_plugin.WindowCommand):
     '''Create a new file with header'''
 
@@ -273,6 +274,7 @@ class FileHeaderReplaceCommand(sublime_plugin.TextCommand):
     def run(self, edit, region, strings):
         region = sublime.Region(region[0], region[1])
         self.view.replace(edit, region, strings)
+
 
 class UpdateModifiedTimeListener(sublime_plugin.EventListener):
     '''Auto update `modified_time` when save file'''
