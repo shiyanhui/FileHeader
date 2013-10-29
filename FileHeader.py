@@ -268,7 +268,7 @@ class FileHeaderAddHeaderCommand(sublime_plugin.WindowCommand):
     def run(self, paths=[]):
         initial_text = ''
         if paths:
-            initial_text = os.paths.abspath(paths[0])
+            initial_text = os.path.abspath(paths[0])
         else:
             try:
                 initial_text = Window().active_view().file_name()
