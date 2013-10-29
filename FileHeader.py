@@ -1,10 +1,17 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+# @Date: 2013-10-29 10:36:50
+# @Author: 
+# @Last modified: 2013-10-29 11:10:24
+
 # -*- coding: utf-8 -*-
 
 import sublime
 import sublime_plugin
+import functools
 import os
 import sys
-import functools
+import re
 
 from datetime import datetime
 
@@ -32,19 +39,45 @@ def get_template(syntax_type):
     template_file.close()
     return contents
 
+def get_strftime():
+    '''Get `time_format` setting'''
+
+    options = Settings().get('options')
+    _ = ['%Y-%m-%d %H:%M:%S', '%Y-%m-%d', '%H:%M:%S']
+    try:
+        format = _[options['time_format']]
+    except IndexError:
+        format = _[0]
+    return format
+
+def get_args(syntax_type):
+    '''Get the args rendered'''
+
+    options = Settings().get('options')
+    args = Settings().get('Default')
+    args.update(Settings().get(syntax_type, {}))
+
+    format = get_strftime()
+    time = datetime.now().strftime(format)
+
+    if options['create_time']:
+        args.update({'create_time': time})
+
+    if options['modified_time']:
+        args.update({'modified_time': time})
+
+    return args
+
 def render_template(syntax_type):
     '''Render the template correspond `syntax_type`'''
 
     from jinja2 import Template
     template = Template(get_template(syntax_type))
-    args = Settings().get('default')
-    args.update(Settings().get(syntax_type, {}))
-    render_string = template.render(args)
+    render_string = template.render(get_args(syntax_type))
     return render_string
 
 def get_syntax_type(name):
     '''Judge `syntax_type` according to to `name`'''
-
     options = Settings().get('options')
     syntax_type = options['syntax_when_not_match']
 
@@ -201,4 +234,64 @@ class FileHeaderAddHeaderCommand(sublime_plugin.WindowCommand):
                                   initial_text=initial_text, 
                                   on_done=self.on_done, on_change=None,
                                   on_cancel=None)
+
+
+class FileHeaderReplaceCommand(sublime_plugin.TextCommand):
+    '''Replace contents in the `region` with `stirng`'''
+
+    def run(self, edit, region, strings):
+        region = sublime.Region(region[0], region[1])
+        self.view.replace(edit, region, strings)
+
+class UpdateModifiedTimeListener(sublime_plugin.EventListener):
+    '''Update `modified_time` when save file'''
+
+    MODIFIED_REGEX = re.compile('\{\{\s*modified_time\s*\}\}') 
+
+    @classmethod
+    def time_pattern(cls):
+        options = Settings().get('options')
+
+        choice = options['time_format']
+        _ = [0, 1, 2]
+        if choice not in _:
+            choice = 0
+
+        _ = ['\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}', 
+             '\d{4}-\d{2}-\d{2}', '\d{2}:\d{2}:\d{2}']
+        return _[choice]
+
+    def on_pre_save(self, view):
+        options = Settings().get('options')
+        if not options['modified_time']:
+            return
+
+        syntax_type = get_syntax_type(view.file_name())
+        template = get_template(syntax_type)    
+
+        line_pattern = None
+        lines = template.split('\n')
+        for line in lines:
+            search = UpdateModifiedTimeListener.MODIFIED_REGEX.search(line)
+            if search is not None:
+                var = search.group()
+                line_pattern = line.replace(var, 
+                                    UpdateModifiedTimeListener.time_pattern())
+                break
+
+        if line_pattern is not None:
+            _ = view.find(line_pattern, 0)
+            if(_ != (-1, -1) and _ is not None):
+                region = view.find(UpdateModifiedTimeListener.time_pattern(), 
+                                   _.a)
+
+                strftime = get_strftime()
+                time = datetime.now().strftime(strftime)
+                view.run_command('file_header_replace', 
+                                 {'region': (region.a, region.b), 
+                                  'strings': time})
+
+
+
+
 
