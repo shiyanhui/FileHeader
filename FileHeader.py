@@ -1,9 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# @Date: 2013-10-29 11:28:36
-# @Author: Lime
-# @Email: shiyanhui66@gmail.com
-# @Last modified: 2013-10-29 12:55:42
 
 import sublime
 import sublime_plugin
@@ -33,9 +29,24 @@ def Settings():
 def get_template(syntax_type):
     '''Get template correspond `syntax_type`'''
 
-    template_file = open('%s%s.tmpl' % (TEMPLATE_PATH, syntax_type), 'r')
-    contents = template_file.read() + '\n'
-    template_file.close()
+    tmpl_name = '%s.tmpl' % syntax_type
+
+    tmpl_file = os.path.join(TEMPLATE_PATH, tmpl_name)
+
+    options = Settings().get('options')
+    custom_template_path = options['custom_template_path']
+    if custom_template_path:
+        _ = os.path.join(custom_template_path, tmpl_name)
+        if os.path.exists(_) and os.path.isfile(_):
+            tmpl_file = _
+
+    try:
+        template_file = open(tmpl_file, 'r')
+        contents = template_file.read() + '\n'
+        template_file.close()
+    except Exception as e:
+        sublime.error_message(e)
+        contents = ''
     return contents
 
 def get_strftime():
@@ -71,8 +82,12 @@ def render_template(syntax_type):
     '''Render the template correspond `syntax_type`'''
 
     from jinja2 import Template
-    template = Template(get_template(syntax_type))
-    render_string = template.render(get_args(syntax_type))
+    try:
+        template = Template(get_template(syntax_type))
+        render_string = template.render(get_args(syntax_type))
+    except Exception as e:
+        sublime.error_message(e)
+        render_string = ''
     return render_string
 
 def get_syntax_type(name):
