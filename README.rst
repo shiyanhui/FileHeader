@@ -23,7 +23,6 @@ Features
 - Auto update file last modified time.
 - Support both Sublime Text 2 and Sublime Text 3.
 
-.. _Jinja2: http://jinja.pocoo.org/docs/
 
 Installation
 ============
@@ -83,7 +82,7 @@ A very important feature of FileHeader is that it can automic update last modifi
 Settings
 ========
 
-There are three kinds of arguments, **options**, **Default** and kinds of languages variables settings. **options** is the functional setting, *Default* is the default language variables settings.
+There are three kinds of arguments, **options**, **Default** and kinds of languages variables settings. **options** is the functional setting, **Default** is the default language variables settings. Language variables setting will cover that in **Default**.
 
 .. code-block:: c++
     
@@ -129,3 +128,22 @@ There are three kinds of arguments, **options**, **Default** and kinds of langua
         "Batch File": {},
         //................
     }
+
+
+Template
+========
+
+FileHeader use Jinja2_ template, you can find how to use it `here <http://jinja.pocoo.org/docs/>`_. You can write you own template. Take **Python.tmpl** for example.
+
+    .. code-block:: c++
+
+        # -*- coding: utf-8 -*-
+        # @Date:    {{create_time}}
+        # @Author:  {{author}}
+        # @Email:   {{email}}
+        # @Last modified: {{modified_time}}
+
+Variable in **{{ }}** is set in the language settings, you can set it in setting files. **create_time** will be automic set when you create a new file using FileHeader, and **modified_time** will be update every time you save your file.
+
+
+.. _Jinja2: http://jinja.pocoo.org/docs/
