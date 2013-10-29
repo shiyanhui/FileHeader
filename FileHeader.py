@@ -321,8 +321,3 @@ class UpdateModifiedTimeListener(sublime_plugin.EventListener):
                 view.run_command('file_header_replace', 
                                  {'region': (region.a, region.b), 
                                   'strings': time})
-
-
-
-
-
