@@ -7,6 +7,7 @@ import functools
 import os
 import sys
 import re
+import threading
 
 from datetime import datetime
 
@@ -17,7 +18,7 @@ PLUGIN_NAME = 'FileHeader'
 sys.path.insert(0, ROOT_PATH)
 
 def Window():
-    '''Get current active window'''
+    '''Get current act``ive window'''
 
     return sublime.active_window()
 
@@ -94,49 +95,14 @@ def get_syntax_type(name):
     '''Judge `syntax_type` according to to `name`'''
     options = Settings().get('options')
     syntax_type = options['syntax_when_not_match']
+    file_suffix_mapping = options['file_suffix_mapping']
 
     name = name.split('.')
     if len(name) <= 1:
         return syntax_type
 
-    syntax_map = {
-        'as': 'ActionScript',
-        'scpt': 'AppleScript',
-        'asp': 'ASP',
-        'aspx': 'ASP',
-        'c': 'C++',
-        'cs': 'C#',
-        'cpp': 'C++',
-        'clj': 'Clojure',
-        'css': 'CSS',
-        'd': 'D',
-        'erl': 'Erlang',
-        'go': 'Go',
-        'hs': 'Haskell',
-        'htm': 'HTML',
-        'html': 'HTML',
-        'java': 'Java',
-        'js': 'JavaScript',
-        'tex': 'LaTeX',
-        'lisp': 'Lisp',
-        'lua': 'Lua',
-        'mat': 'Matlab',
-        'cc': 'Objective-C',
-        'pas': 'Pascal',
-        'pl': 'Perl',
-        'php': 'PHP',
-        'py': 'Python',
-        'rb': 'Ruby',
-        'scala': 'Scala',
-        'sh': 'ShellScript',
-        'sql': 'SQL',
-        'tcl': 'TCL',
-        'txt': 'Text',
-        'xml': 'XML',
-    }
-
     try:
-        syntax_type = syntax_map[name[-1]]
+        syntax_type = file_suffix_mapping[name[-1]]
     except KeyError:
         pass
 
@@ -157,6 +123,7 @@ def block(view, callback, *args, **kwargs):
             callback(*args, **kwargs)
     _block()
 
+
 class FileHeaderNewFileCommand(sublime_plugin.WindowCommand):
     '''Create a new file with header'''
 
@@ -176,7 +143,21 @@ class FileHeaderNewFileCommand(sublime_plugin.WindowCommand):
             return
 
         new_file = Window().open_file(path)
-        block(new_file, new_file.set_syntax_file, get_syntax_file(syntax_type))
+        try:
+            block(new_file, new_file.set_syntax_file, get_syntax_file(syntax_type))
+        except:
+            pass
+        block(new_file, new_file.show_at_center, 0)
+
+    def new_view(self, syntax_type, name):
+        header = render_template(syntax_type)
+        new_file = Window().new_file()
+        new_file.set_name(name)
+        new_file.run_command('insert', {'characters': header})
+        try:
+            new_file.set_syntax_file(get_syntax_file(syntax_type))
+        except:
+            pass
 
     def on_done(self, paths, name):
         if not name:
@@ -188,14 +169,13 @@ class FileHeaderNewFileCommand(sublime_plugin.WindowCommand):
             current_view = Window().active_view()
             if current_view:
                 file_name = current_view.file_name()
-                path = os.path.join(os.path.dirname(file_name), name)
-                self.new_file(path, syntax_type)
+                if file_name is None:
+                    self.new_view(syntax_type, name)
+                else:
+                    path = os.path.join(os.path.dirname(file_name), name)
+                    self.new_file(path, syntax_type)
             else:
-                header = render_template(syntax_type)
-                new_file = Window().new_file()
-                new_file.set_name(name)
-                new_file.run_command('insert', {'characters': header})
-                new_file.set_syntax_file(get_syntax_file(syntax_type))
+                self.new_view(syntax_type, name)
             return
 
         path = paths[0]
@@ -208,9 +188,32 @@ class FileHeaderNewFileCommand(sublime_plugin.WindowCommand):
         
     def run(self, paths=[]):
         Window().run_command('hide_panel')
-        Window().show_input_panel(caption='File Name:', initial_text='', 
-                                  on_done=functools.partial(self.on_done, paths
-                                  ), on_change=None, on_cancel=None)
+        Window().show_input_panel('File Name:', '', functools.partial(
+                                  self.on_done, paths), None, None)
+
+
+class BackgroundAddHeaderThread(threading.Thread):
+    '''Add header in background.'''
+
+    def __init__(self, path):
+        self.path = path
+        super(BackgroundAddHeaderThread, self).__init__()
+
+    def run(self):
+            
+        syntax_type = get_syntax_type(self.path)
+        header = render_template(syntax_type)
+
+        try:
+            with open(self.path, 'r') as f:
+                contents = header + f.read()
+                f.close()
+
+            with open(self.path, 'w') as f:
+                f.write(contents)
+                f.close()
+        except Exception as e:
+            sublime.error_message(e)
 
 
 class AddFileHeaderCommand(sublime_plugin.TextCommand):
@@ -219,9 +222,7 @@ class AddFileHeaderCommand(sublime_plugin.TextCommand):
     def run(self, edit, path):
         syntax_type = get_syntax_type(path)
         header = render_template(syntax_type)
-        self.view.set_syntax_file(get_syntax_file(syntax_type))
         self.view.insert(edit, 0, header)
-
 
 class FileHeaderAddHeaderCommand(sublime_plugin.WindowCommand):
     '''Conmmand: add `header` in a file or directory'''
@@ -229,9 +230,17 @@ class FileHeaderAddHeaderCommand(sublime_plugin.WindowCommand):
     def add(self, path):
         '''Add to a file'''
 
-        modified_file = Window().open_file(path)
-        block(modified_file, modified_file.run_command, 
-              'add_file_header', {'path': path})
+        options = Settings().get('options')
+        whether_open_file = options['open_file_when_add_header_to_directory'] 
+
+        if whether_open_file:
+            modified_file = Window().open_file(path)
+            block(modified_file, modified_file.run_command, 
+                  'add_file_header', {'path': path})
+            block(modified_file, modified_file.show_at_center, 0)
+        else:
+            thread = BackgroundAddHeaderThread(path)
+            thread.start()
 
     def walk(self, path):
         '''Add files in the path'''
@@ -257,22 +266,35 @@ class FileHeaderAddHeaderCommand(sublime_plugin.WindowCommand):
             self.walk(path)
 
     def run(self, paths=[]):
-        initial_text = (os.path.abspath(paths[0]) if paths else 
-                        Window().active_view().file_name())
+        initial_text = ''
+        if paths:
+            initial_text = os.path.abspath(paths[0])
+        else:
+            try:
+                initial_text = Window().active_view().file_name()
+            except:
+                pass
+
+        options = Settings().get('options')
+        show_input_panel_when_add_header = (options[
+            'show_input_panel_when_add_header'])
+
+        if not show_input_panel_when_add_header:
+            self.on_done(initial_text)
+            return
 
         Window().run_command('hide_panel')
-        Window().show_input_panel(caption='Modified File or Directory:', 
-                                  initial_text=initial_text, 
-                                  on_done=self.on_done, on_change=None,
-                                  on_cancel=None)
+        Window().show_input_panel('Modified File or Directory:', initial_text, 
+                                  self.on_done, None, None)
 
 
 class FileHeaderReplaceCommand(sublime_plugin.TextCommand):
     '''Replace contents in the `region` with `stirng`'''
 
-    def run(self, edit, region, strings):
-        region = sublime.Region(region[0], region[1])
+    def run(self, edit, a, b, strings):
+        region = sublime.Region(int(a), int(b))
         self.view.replace(edit, region, strings)
+
 
 class UpdateModifiedTimeListener(sublime_plugin.EventListener):
     '''Auto update `modified_time` when save file'''
@@ -315,9 +337,9 @@ class UpdateModifiedTimeListener(sublime_plugin.EventListener):
             if(_ != (-1, -1) and _ is not None):
                 region = view.find(UpdateModifiedTimeListener.time_pattern(), 
                                    _.a)
-
                 strftime = get_strftime()
                 time = datetime.now().strftime(strftime)
                 view.run_command('file_header_replace', 
-                                 {'region': (region.a, region.b), 
+                                 {'a': region.a, 
+                                  'b': region.b,
                                   'strings': time})

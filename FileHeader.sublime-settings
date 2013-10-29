@@ -1,10 +1,5 @@
 {
     "options": {
-        // FileHeader judges programming language according file suffix.
-        //
-        // Default programming language if FileHeader judges failed when you
-        // create new file.
-        "syntax_when_not_match": "Text",
         // Whether enable variable `create_time`. If false the variable 
         // `create_time` won't work. 
         "create_time": true,
@@ -23,13 +18,63 @@
         // "Python.tmpl" for example. FileHeader will search your custom path
         // prior, and FileHeader will use the default .tmpl file if fail.
         "custom_template_path": "",
-    },
+        //Whether show input panel when you add header. The default file which 
+        //you add header to is the current file you edit.
+        "show_input_panel_when_add_header": true,
+        //Whether open file when you add header to files in the specified 
+        // directory.
+        "open_file_when_add_header_to_directory": true,
+        // FileHeader judges programming language according file suffix.
+        //
+        // Default programming language if FileHeader judges failed when you
+        // create new file.
+        "syntax_when_not_match": "Text",
+        // FileHeader will judge programming language according to file suffix.
+        // You can add more file suffix here. Note: language should be one of 
+        // that under **Default**. If FileHeader don't find the suffix,
+        // FileHeader will set language as **syntax_when_not_match** above.
+        "file_suffix_mapping":{
+            "as": "ActionScript",
+            "scpt": "AppleScript",
+            "asp": "ASP",
+            "aspx": "ASP",
+            "c": "C++",
+            "cs": "C#",
+            "cpp": "C++",
+            "clj": "Clojure",
+            "css": "CSS",
+            "d": "D",
+            "erl": "Erlang",
+            "go": "Go",
+            "hs": "Haskell",
+            "htm": "HTML",
+            "html": "HTML",
+            "java": "Java",
+            "js": "JavaScript",
+            "tex": "LaTeX",
+            "lisp": "Lisp",
+            "lua": "Lua",
+            "mat": "Matlab",
+            "cc": "Objective-C",
+            "pas": "Pascal",
+            "pl": "Perl",
+            "php": "PHP",
+            "py": "Python",
+            "rb": "Ruby",
+            "scala": "Scala",
+            "sh": "ShellScript",
+            "sql": "SQL",
+            "tcl": "TCL",
+            "txt": "Text",
+            "xml": "XML"
+        }
+    } ,
     // The default variables you render.
     "Default": {
         // Author 
         "author": "Your Name",
         // Email
-        "email": "email@example.com",
+        "email": "email@example.com"
         // You can add more here......
     },
     // You can set different variables in different languages. It will cover 
@@ -42,7 +87,6 @@
     "C++": {},
     "CSS": {},
     "Clojure": {},
-    "Color Scheme - Default": {},
     "D": {},
     "Diff": {},
     "Erlang": {},
@@ -54,7 +98,6 @@
     "Java": {},
     "JavaScript": {},
     "LaTeX": {},
-    "Language - English": {},
     "Lisp": {},
     "Lua": {},
     "Makefile": {},
@@ -68,7 +111,6 @@
     "Python": {},
     "R": {},
     "Rails": {},
-    "Regular Expressions": {},
     "RestructuredText": {},
     "Ruby": {},
     "SQL": {},
@@ -77,8 +119,7 @@
     "TCL": {},
     "Text": {},
     "Textile": {},
-    "Theme - Default": {},
     "Vintage": {},
     "XML": {},
-    "YAML": {},
+    "YAML": {}
 }
