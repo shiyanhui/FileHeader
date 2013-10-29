@@ -31,13 +31,38 @@ Installation
 Usage
 =====
 
-Thers is two ways.
+Create a new file with project info
+-----------------------------------
 
-From side bar
--------------
+- From the sidebar 
+
+    .. image:: https://github.com/shiyanhui/FileHeader/blob/master/doc/source/_static/new%20file%20sidebar.gif
+
+- Shortcuts    
+
+    .. image:: https://github.com/shiyanhui/FileHeader/blob/master/doc/source/_static/new%20file%20shortcuts.gif
+
+    The shortcuts is `super+alt+n` on OS X, `ctrl+alt+n` on Windows and Linux.
+
+Add header to an existed file
+-----------------------------
+
+- From the sidebar
+
+    .. image:: https://github.com/shiyanhui/FileHeader/blob/master/doc/source/_static/add%20header%20sidebar.gif
+
+- Shortcuts
+
+    .. image:: https://github.com/shiyanhui/FileHeader/blob/master/doc/source/_static/add%20header%20shortcuts.gif
+
+    The shortcuts is `super+alt+a` on OS X, `ctrl+alt+a` on Windows and Linux.
+
+Add header to files in specified directory
+------------------------------------------
+
+.. image:: https://github.com/shiyanhui/FileHeader/blob/master/doc/source/_static/add%20header%20in%20dir.gif
 
 
-Shortcuts
----------
+A very important feature of FileHeader is it can automic update file last modified time. Just look this: 
 
-
+.. image:: https://github.com/shiyanhui/FileHeader/blob/master/doc/source/_static/add%20header%20in%20dir.gif
