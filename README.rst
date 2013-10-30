@@ -43,6 +43,10 @@ Go to the "Packages" directory **(Preferences / Browse Packages)**. Then clone t
 
 Or download zip from Github, and put it in "Packages" directory **(Preferences / Browse Packages)**.
 
+Releases
+--------
+
+See releases and logs `here <https://github.com/shiyanhui/FileHeader/releases>`_, it's stable.
 
 Usage
 =====
@@ -58,6 +62,10 @@ Create a new file
 
     The shortcuts is **super+alt+n** on OS X, **ctrl+alt+n** on Windows and Linux.
 
+- Context menu
+
+    Similar to **Sidebar menu**.
+
 Add header to an existed file
 -----------------------------
 
@@ -69,6 +77,10 @@ Add header to an existed file
 
     The shortcuts is **super+alt+a** on OS X, **ctrl+alt+a** on Windows and Linux.
 
+- Context menu
+
+    Similar to **Sidebar menu**.
+    
 Add header to files in the specified directory
 ----------------------------------------------
 
@@ -88,11 +100,6 @@ There are three kinds of arguments, **options**, **Default** and kinds of langua
     
     {
         "options": {
-            // FileHeader judges programming language according file suffix.
-            //
-            // Default programming language if FileHeader judges failed when you
-            // create new file.
-            "syntax_when_not_match": "Text",
             // Whether enable variable `create_time`. If false the variable 
             // `create_time` won't work. 
             "create_time": true,
@@ -110,7 +117,57 @@ There are three kinds of arguments, **options**, **Default** and kinds of langua
             // write your own .tmpl files. The file name should be a language, 
             // "Python.tmpl" for example. FileHeader will search your custom path
             // prior, and FileHeader will use the default .tmpl file if fail.
-            "custom_template_path": ""
+            "custom_template_path": "",
+            //Whether show input panel when you add header. The default file which 
+            //you add header to is the current file you edit.
+            "show_input_panel_when_add_header": true,
+            //Whether open file when you add header to files in the specified 
+            // directory.
+            "open_file_when_add_header_to_directory": true,
+            // FileHeader judges programming language according file suffix.
+            //
+            // Default programming language if FileHeader judges failed when you
+            // create new file.
+            "syntax_when_not_match": "Text",
+            // FileHeader will judge programming language according to file suffix.
+            // You can add more file suffix here. Note: language should be one of 
+            // that under **Default**. If FileHeader don't find the suffix,
+            // FileHeader will set language as **syntax_when_not_match** above.
+            "file_suffix_mapping":{
+                "as": "ActionScript",
+                "scpt": "AppleScript",
+                "asp": "ASP",
+                "aspx": "ASP",
+                "c": "C++",
+                "cs": "C#",
+                "cpp": "C++",
+                "clj": "Clojure",
+                "css": "CSS",
+                "d": "D",
+                "erl": "Erlang",
+                "go": "Go",
+                "hs": "Haskell",
+                "htm": "HTML",
+                "html": "HTML",
+                "java": "Java",
+                "js": "JavaScript",
+                "tex": "LaTeX",
+                "lisp": "Lisp",
+                "lua": "Lua",
+                "mat": "Matlab",
+                "cc": "Objective-C",
+                "pas": "Pascal",
+                "pl": "Perl",
+                "php": "PHP",
+                "py": "Python",
+                "rb": "Ruby",
+                "scala": "Scala",
+                "sh": "ShellScript",
+                "sql": "SQL",
+                "tcl": "TCL",
+                "txt": "Text",
+                "xml": "XML"
+            }
         } ,
         // The default variables you render.
         "Default": {
