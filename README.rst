@@ -60,7 +60,7 @@ Create a new file
 
 - Shortcuts    
 
-    The shortcuts is **super+alt+n** on OS X, **ctrl+alt+n** on Windows and Linux.
+    The default shortcuts is **super+alt+n** on OS X, **ctrl+alt+n** on Windows and Linux.
 
 - Context menu
 
@@ -69,13 +69,13 @@ Create a new file
 Add header to an existed file
 -----------------------------
 
-- Sidebar
+- Sidebar menu
 
     .. image:: ./doc/add%20header%20sidebar.gif
 
 - Shortcuts
 
-    The shortcuts is **super+alt+a** on OS X, **ctrl+alt+a** on Windows and Linux.
+    The default shortcuts is **super+alt+a** on OS X, **ctrl+alt+a** on Windows and Linux.
 
 - Context menu
 
