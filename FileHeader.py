@@ -30,7 +30,7 @@ def plugin_loaded():
         if os.path.exists(INSTALLED_PLGIN_PATH):
             z = zipfile.ZipFile(INSTALLED_PLGIN_PATH, 'r')
             for f in z.namelist():
-                z.extract(f, extract_dir)
+                z.extract(f, PLUGIN_PATH)
             z.close()
 
 def Window():
