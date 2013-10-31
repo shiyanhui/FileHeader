@@ -159,37 +159,47 @@ class FileHeaderNewFileCommand(sublime_plugin.WindowCommand):
         except:
             pass
 
-    def on_done(self, paths, name):
-        if not name:
-            return 
-
-        syntax_type = get_syntax_type(name)
-        
+    def get_path(self, paths):
+        path = None
         if not paths:
             current_view = Window().active_view()
             if current_view:
                 file_name = current_view.file_name()
-                if file_name is None:
-                    self.new_view(syntax_type, name)
-                else:
-                    path = os.path.join(os.path.dirname(file_name), name)
-                    self.new_file(path, syntax_type)
-            else:
-                self.new_view(syntax_type, name)
-            return
-
-        path = paths[0]
-        if(os.path.isdir(path)):
-            path = os.path.join(path, name)
+                if file_name is not None:
+                    path = os.path.dirname(file_name)
         else:
-            path = os.path.join(os.path.dirname(path), name)
+            path = paths[0]
+            if not os.paths.isdir():
+                path = os.path.dirname(path)
 
-        self.new_file(path, syntax_type)
-        
+
+        if path is not None:
+            path = os.path.abspath(path)
+
+        return path
+
+    def on_done(self, path, name):
+        if not name:
+            return 
+
+        syntax_type = get_syntax_type(name)
+                
+        if path is None:
+            self.new_view(syntax_type, name)
+        else:
+            path = os.path.join(path, name)
+            self.new_file(path, syntax_type)
+
     def run(self, paths=[]):
+        path = self.get_path(paths)
+
+        caption = 'File Name:'
+        # if caption is not None:
+        #     caption = 'File Nanme: (Saved in %s)' % path
+
         Window().run_command('hide_panel')
-        Window().show_input_panel('File Name:', '', functools.partial(
-                                  self.on_done, paths), None, None)
+        Window().show_input_panel(caption, '', functools.partial(
+                                  self.on_done, path), None, None)
 
 
 class BackgroundAddHeaderThread(threading.Thread):
