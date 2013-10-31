@@ -12,10 +12,13 @@ import threading
 from datetime import datetime
 
 ROOT_PATH = os.path.abspath(os.path.dirname(__file__))
-TEMPLATE_PATH = ROOT_PATH + '/template/'
-PLUGIN_NAME = 'FileHeader'
 
-sys.path.insert(0, ROOT_PATH)
+PACKAGES_PATH = sublime.packages_path()
+PLUGIN_NAME = 'FileHeader'
+PLUGIN_PATH = PACKAGES_PATH + '/' + PLUGIN_NAME
+TEMPLATE_PATH = PLUGIN_PATH + '/template/'
+
+sys.path.insert(0, PLUGIN_PATH)
 
 def Window():
     '''Get current act``ive window'''
@@ -31,7 +34,6 @@ def get_template(syntax_type):
     '''Get template correspond `syntax_type`'''
 
     tmpl_name = '%s.tmpl' % syntax_type
-
     tmpl_file = os.path.join(TEMPLATE_PATH, tmpl_name)
 
     options = Settings().get('options')
@@ -111,7 +113,16 @@ def get_syntax_type(name):
 def get_syntax_file(syntax_type):
     '''Get syntax file path'''
 
-    return 'Packages/%s/%s.tmLanguage' % (syntax_type, syntax_type)
+    lang2tmL = {
+        'Graphviz': 'DOT',
+        'RestructuredText': 'reStructuredText',
+        'ShellScript': 'Shell-Unix-Generic',
+        'TCL': 'Tcl',
+        'Text': 'Plain text',
+    }
+
+    tmL = lang2tmL.get(syntax_type, syntax_type)
+    return 'Packages/%s/%s.tmLanguage' % (syntax_type, tmL)
 
 def block(view, callback, *args, **kwargs):
     '''Ensure the callback is executed'''
@@ -121,6 +132,7 @@ def block(view, callback, *args, **kwargs):
             sublime.set_timeout(_block, 100)
         else:
             callback(*args, **kwargs)
+
     _block()
 
 
@@ -143,10 +155,7 @@ class FileHeaderNewFileCommand(sublime_plugin.WindowCommand):
             return
 
         new_file = Window().open_file(path)
-        try:
-            block(new_file, new_file.set_syntax_file, get_syntax_file(syntax_type))
-        except:
-            pass
+        block(new_file, new_file.set_syntax_file, get_syntax_file(syntax_type))
         block(new_file, new_file.show_at_center, 0)
 
     def new_view(self, syntax_type, name):
@@ -154,42 +163,48 @@ class FileHeaderNewFileCommand(sublime_plugin.WindowCommand):
         new_file = Window().new_file()
         new_file.set_name(name)
         new_file.run_command('insert', {'characters': header})
-        try:
-            new_file.set_syntax_file(get_syntax_file(syntax_type))
-        except:
-            pass
+        new_file.set_syntax_file(get_syntax_file(syntax_type))
 
-    def on_done(self, paths, name):
-        if not name:
-            return 
-
-        syntax_type = get_syntax_type(name)
-        
+    def get_path(self, paths):
+        path = None
         if not paths:
             current_view = Window().active_view()
             if current_view:
                 file_name = current_view.file_name()
-                if file_name is None:
-                    self.new_view(syntax_type, name)
-                else:
-                    path = os.path.join(os.path.dirname(file_name), name)
-                    self.new_file(path, syntax_type)
-            else:
-                self.new_view(syntax_type, name)
-            return
-
-        path = paths[0]
-        if(os.path.isdir(path)):
-            path = os.path.join(path, name)
+                if file_name is not None:
+                    path = os.path.dirname(file_name)
         else:
-            path = os.path.join(os.path.dirname(path), name)
+            path = paths[0]
+            if not os.path.isdir(path):
+                path = os.path.dirname(path)
 
-        self.new_file(path, syntax_type)
-        
+        if path is not None:
+            path = os.path.abspath(path)
+
+        return path
+
+    def on_done(self, path, name):
+        if not name:
+            return 
+
+        syntax_type = get_syntax_type(name)
+                
+        if path is None:
+            self.new_view(syntax_type, name)
+        else:
+            path = os.path.join(path, name)
+            self.new_file(path, syntax_type)
+
     def run(self, paths=[]):
+        path = self.get_path(paths)
+
+        caption = 'File Name:'
+        # if caption is not None:
+        #     caption = 'File Nanme: (Saved in %s)' % path
+
         Window().run_command('hide_panel')
-        Window().show_input_panel('File Name:', '', functools.partial(
-                                  self.on_done, paths), None, None)
+        Window().show_input_panel(caption, '', functools.partial(
+                                  self.on_done, path), None, None)
 
 
 class BackgroundAddHeaderThread(threading.Thread):
