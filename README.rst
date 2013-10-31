@@ -279,17 +279,17 @@ There are three kinds of arguments, **options**, **Default** and kinds of langua
 Template
 ========
 
-FileHeader use Jinja2_ template, you can find how to use it `here <http://jinja.pocoo.org/docs/>`_. You can write you own template. Take **Python.tmpl** for example.
+FileHeader use Jinja2_ template, find out how to use it `here <http://jinja.pocoo.org/docs/>`_. You also can write you own templates. Take **Python.tmpl** for example.
 
     .. code-block:: c++
 
         # -*- coding: utf-8 -*-
-        # @Date:    {{create_time}}
-        # @Author:  {{author}}
-        # @Email:   {{email}}
-        # @Last modified: {{modified_time}}
+        # @Author: {{author}}
+        # @Date:   {{create_time}}
+        # @Email:  {{email}}
+        # @Last modified by:   {{last_modified_by}}
+        # @Last Modified time: {{last_modified_time}}
 
-Variable in **{{ }}** is set in the language settings, you can set it in setting files. **create_time** will be automic set when you create a new file using FileHeader, and **modified_time** will be update every time you save your file.
-
+**{{ }}** is variable, you can set it in setting files. **create_time** will be automic set when you create a new file using FileHeader, and **modified_time** will be update every time you save your file. 
 
 .. _Jinja2: http://jinja.pocoo.org/docs/
