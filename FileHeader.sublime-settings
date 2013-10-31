@@ -1,38 +1,44 @@
 {
     "options": {
-        // Whether enable variable `create_time`. If false the variable 
-        // `create_time` won't work. 
-        "create_time": true,
-        // Whether enable variable `modified_time`. If false the variable 
-        // `modified_time` won't work. 
-        // If enable it, it will update {{ modified_time }} every time you
-        // save file.
-        "modified_time": true,
-        // The datetime format.
-        // 0: "%Y-%m-%d %H:%M:%S"
-        // 1: "%Y-%m-%d"
-        // 2: "%H:%M:%S"
+        /*
+        The datetime format.
+
+            0: "%Y-%m-%d %H:%M:%S"
+            1: "%Y-%m-%d"
+            2: "%H:%M:%S"
+        */
         "time_format": 0,
-        // Set your custom template path here, it is a directory. In it you 
-        // write your own .tmpl files. The file name should be a language, 
-        // "Python.tmpl" for example. FileHeader will search your custom path
-        // prior, and FileHeader will use the default .tmpl file if fail.
+        /*
+        Set your custom template path here, it is a directory in which you 
+        write your own .tmpl files. The file name should be a language, 
+        "Python.tmpl" for example. 
+
+        FileHeader will search your custom path prior, and FileHeader will use the default .tmpl file if fail.
+        */
         "custom_template_path": "",
-        //Whether show input panel when you add header. The default file which 
-        //you add header to is the current file you edit.
+        /*
+        Whether show input panel when you add header. The default file which 
+        you add header to is the current file you edit.
+        */
         "show_input_panel_when_add_header": true,
-        //Whether open file when you add header to files in the specified 
-        // directory.
+        /*
+        Whether open file when you add header to files in the specified 
+        directory.
+        */
         "open_file_when_add_header_to_directory": true,
-        // FileHeader judges programming language according file suffix.
-        //
-        // Default programming language if FileHeader judges failed when you
-        // create new file.
+        /*
+        FileHeader judges programming language according file suffix.
+
+        Default programming language if FileHeader judges failed when you
+        create new file.
+        */
         "syntax_when_not_match": "Text",
-        // FileHeader will judge programming language according to file suffix.
-        // You can add more file suffix here. Note: language should be one of 
-        // that under **Default**. If FileHeader don't find the suffix,
-        // FileHeader will set language as **syntax_when_not_match** above.
+        /*
+        FileHeader will judge programming language according to file suffix.
+        You can add more file suffix here. Note: language should be one of 
+        that under **Default**. If FileHeader don't find the suffix,
+        FileHeader will set language as **syntax_when_not_match** above.
+        */
         "file_suffix_mapping":{
             "as": "ActionScript",
             "scpt": "AppleScript",
@@ -71,14 +77,59 @@
     } ,
     // The default variables you render.
     "Default": {
-        // Author 
-        "author": "Your Name",
-        // Email
+        /*
+        Builtin Variables
+        =================
+    
+        - create_time
+
+            The file created time. It will be automatically set when you create
+            a new file if you use it. 
+
+            Can't be set custom.
+
+        - author
+
+            The file creator. 
+
+            FileHeader will set it automatically. If it's in
+            a git repository and the `user.name` has been set, `autor` 
+            will set to `user.name`, otherwise it will be set to current 
+            system user.
+
+            Can be set custom.
+
+        - last_modified_by
+
+            The file last modified by who? 
+
+            FileHeader will set it automatically. If it's in
+            a git repository and the `user.name` has been set, `autor` 
+            will set to `user.name`, otherwise it will be set to current 
+            system logined user.
+
+            Can be set custom.
+
+        - last_modified_time
+            
+            The file last modified time.
+
+            FileHeader will set it automatically when you save the file.
+
+            Can't be set custom
+        */
+
+        /*
+        Email
+        */
         "email": "email@example.com"
+
         // You can add more here......
     },
-    // You can set different variables in different languages. It will cover 
-    // that in "Default".
+    /*
+    You can set different variables in different languages. It will cover 
+    that in "Default".
+    */
     "ASP": {},
     "ActionScript": {},
     "AppleScript": {},

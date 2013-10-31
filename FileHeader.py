@@ -1,16 +1,13 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
-import sublime
-import sublime_plugin
-import functools
 import os
 import sys
 import re
+import sublime
+import sublime_plugin
+import functools
 import threading
 import zipfile
-
-from datetime import datetime
 
 INSTALLED_PLGIN_PATH = os.path.abspath(os.path.dirname(__file__))
 
@@ -76,6 +73,22 @@ def get_strftime():
         format = _[0]
     return format
 
+def get_user():
+    '''Get user'''
+
+    if sys.version < '3':
+        import commands as process
+    else:    
+        import subprocess as process
+          
+    status, output = process.getstatusoutput('git config --get user.name')
+    if status == 0 and output:
+        user = output
+    else:
+        user = getpass.getuser()   
+
+    return user
+
 def get_args(syntax_type):
     '''Get the args rendered'''
 
@@ -86,11 +99,16 @@ def get_args(syntax_type):
     format = get_strftime()
     time = datetime.now().strftime(format)
 
-    if options['create_time']:
-        args.update({'create_time': time})
+    args.update({'create_time': time})
+    args.update({'last_modified_time': time})
 
-    if options['modified_time']:
-        args.update({'modified_time': time})
+    user = get_user()
+
+    if 'author' not in args:
+        args.update({'author': user})
+
+    if 'last_modified_by' not in args:
+        args.update({'last_modified_by': user})
 
     return args
 
@@ -325,12 +343,12 @@ class FileHeaderReplaceCommand(sublime_plugin.TextCommand):
 
 
 class UpdateModifiedTimeListener(sublime_plugin.EventListener):
-    '''Auto update `modified_time` when save file'''
+    '''Auto update `last_modified_time` when save file'''
 
-    MODIFIED_REGEX = re.compile('\{\{\s*modified_time\s*\}\}') 
+    MODIFIED_TIME_REGEX = re.compile('\{\{\s*last_modified_time\s*\}\}') 
+    MODIFIED_BY_REGEX = re.compile('\{\{\s*last_modified_by\s*\}\}')
 
-    @classmethod
-    def time_pattern(cls):
+    def time_pattern(self):
         options = Settings().get('options')
 
         choice = options['time_format']
@@ -342,33 +360,67 @@ class UpdateModifiedTimeListener(sublime_plugin.EventListener):
              '\d{4}-\d{2}-\d{2}', '\d{2}:\d{2}:\d{2}']
         return _[choice]
 
-    def on_pre_save(self, view):
-        options = Settings().get('options')
-        if not options['modified_time']:
-            return
-
-        syntax_type = get_syntax_type(view.file_name())
-        template = get_template(syntax_type)    
-
+    def update_last_modified_time(self, view, lines):
         line_pattern = None
-        lines = template.split('\n')
         for line in lines:
-            search = UpdateModifiedTimeListener.MODIFIED_REGEX.search(line)
+            search = UpdateModifiedTimeListener.MODIFIED_TIME_REGEX.search(
+                                                                        line)
             if search is not None:
                 var = search.group()
-                line_pattern = line.replace(var, 
-                                    UpdateModifiedTimeListener.time_pattern())
+                line_pattern = line.replace(var, self.time_pattern())
                 break
 
         if line_pattern is not None:
             _ = view.find(line_pattern, 0)
             if(_ != (-1, -1) and _ is not None):
-                region = view.find(UpdateModifiedTimeListener.time_pattern(), 
-                                   _.a)
+                region = view.find(self.time_pattern(), _.a)
                 strftime = get_strftime()
                 time = datetime.now().strftime(strftime)
                 view.run_command('file_header_replace', 
                                  {'a': region.a, 
                                   'b': region.b,
                                   'strings': time})
+    
+    def update_last_modified_by(self, view, lines):
+        user_pattern = '.*\n$'
+        line_pattern = None
+
+        for line in lines:
+            search = UpdateModifiedTimeListener.MODIFIED_BY_REGEX.search(line)
+            if search is not None:
+                var = search.group()
+                index = line.find(var)
+
+                for i in range(index - 1, 0, -1):
+                    if line[i] != ' ':
+                        space_start = i + 1
+                        line_header = line[: space_start]
+                        break        
+
+                line_pattern = line_header + user_pattern
+                break
+
+        if line_pattern is not None:
+
+            _ = view.find(line_pattern, 0)
+            if(_ != sublime.Region(-1, -1) and _ is not None):
+
+                syntax_type = get_syntax_type(view.file_name())
+                args = get_args(syntax_type)
+
+                a = _.a + space_start
+                b = _.b - 1            
+                strings = ((index - space_start) * ' ' + 
+                          args['last_modified_by'])
                 
+                view.run_command('file_header_replace', 
+                                 {'a': a, 'b': b,'strings': strings})
+
+    def on_pre_save(self, view):
+
+        syntax_type = get_syntax_type(view.file_name())
+        template = get_template(syntax_type)    
+        lines = template.split('\n')
+
+        self.update_last_modified_time(view, lines)
+        self.update_last_modified_by(view, lines)
