@@ -169,9 +169,8 @@ class FileHeaderNewFileCommand(sublime_plugin.WindowCommand):
                     path = os.path.dirname(file_name)
         else:
             path = paths[0]
-            if not os.paths.isdir():
+            if not os.path.isdir(path):
                 path = os.path.dirname(path)
-
 
         if path is not None:
             path = os.path.abspath(path)
