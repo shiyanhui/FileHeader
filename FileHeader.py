@@ -111,7 +111,16 @@ def get_syntax_type(name):
 def get_syntax_file(syntax_type):
     '''Get syntax file path'''
 
-    return 'Packages/%s/%s.tmLanguage' % (syntax_type, syntax_type)
+    lang2tmL = {
+        'Graphviz': 'DOT',
+        'RestructuredText': 'reStructuredText',
+        'ShellScript': 'Shell-Unix-Generic',
+        'TCL': 'Tcl',
+        'Text': 'Plain text',
+    }
+
+    tmL = lang2tmL.get(syntax_type, syntax_type)
+    return 'Packages/%s/%s.tmLanguage' % (syntax_type, tmL)
 
 def block(view, callback, *args, **kwargs):
     '''Ensure the callback is executed'''
@@ -121,6 +130,7 @@ def block(view, callback, *args, **kwargs):
             sublime.set_timeout(_block, 100)
         else:
             callback(*args, **kwargs)
+
     _block()
 
 
@@ -143,10 +153,7 @@ class FileHeaderNewFileCommand(sublime_plugin.WindowCommand):
             return
 
         new_file = Window().open_file(path)
-        try:
-            block(new_file, new_file.set_syntax_file, get_syntax_file(syntax_type))
-        except:
-            pass
+        block(new_file, new_file.set_syntax_file, get_syntax_file(syntax_type))
         block(new_file, new_file.show_at_center, 0)
 
     def new_view(self, syntax_type, name):
@@ -154,10 +161,7 @@ class FileHeaderNewFileCommand(sublime_plugin.WindowCommand):
         new_file = Window().new_file()
         new_file.set_name(name)
         new_file.run_command('insert', {'characters': header})
-        try:
-            new_file.set_syntax_file(get_syntax_file(syntax_type))
-        except:
-            pass
+        new_file.set_syntax_file(get_syntax_file(syntax_type))
 
     def get_path(self, paths):
         path = None
