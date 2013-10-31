@@ -113,7 +113,8 @@ There are three kinds of arguments, **options**, **Default** and kinds of langua
             write your own .tmpl files. The file name should be a language, 
             "Python.tmpl" for example. 
 
-            FileHeader will search your custom path prior, and FileHeader will use the default .tmpl file if fail.
+            FileHeader will search your custom path prior, and FileHeader will
+            use the default .tmpl file if fail.
             */
             "custom_template_path": "",
             /*
@@ -201,7 +202,8 @@ There are three kinds of arguments, **options**, **Default** and kinds of langua
 
             - last_modified_by
 
-                The file last modified by who? 
+                The file last modified by who? It is specially useful when 
+                cooperation programming. 
 
                 FileHeader will set it automatically. If it's in
                 a git repository and the `user.name` has been set, `autor` 
