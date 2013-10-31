@@ -46,7 +46,7 @@ def get_template(syntax_type):
         contents = template_file.read() + '\n'
         template_file.close()
     except Exception as e:
-        sublime.error_message(e)
+        sublime.error_message(str(e))
         contents = ''
     return contents
 
@@ -87,7 +87,7 @@ def render_template(syntax_type):
         template = Template(get_template(syntax_type))
         render_string = template.render(get_args(syntax_type))
     except Exception as e:
-        sublime.error_message(e)
+        sublime.error_message(str(e))
         render_string = ''
     return render_string
 
@@ -139,7 +139,7 @@ class FileHeaderNewFileCommand(sublime_plugin.WindowCommand):
                 f.write(header)
                 f.close()
         except Exception as e:
-            sublime.error_message(e)
+            sublime.error_message(str(e))
             return
 
         new_file = Window().open_file(path)
@@ -213,7 +213,7 @@ class BackgroundAddHeaderThread(threading.Thread):
                 f.write(contents)
                 f.close()
         except Exception as e:
-            sublime.error_message(e)
+            sublime.error_message(str(e))
 
 
 class AddFileHeaderCommand(sublime_plugin.TextCommand):
