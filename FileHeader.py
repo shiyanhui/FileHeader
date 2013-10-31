@@ -8,17 +8,30 @@ import os
 import sys
 import re
 import threading
+import zipfile
 
 from datetime import datetime
 
-ROOT_PATH = os.path.abspath(os.path.dirname(__file__))
+INSTALLED_PLGIN_PATH = os.path.abspath(os.path.dirname(__file__))
 
-PACKAGES_PATH = sublime.packages_path()
 PLUGIN_NAME = 'FileHeader'
-PLUGIN_PATH = PACKAGES_PATH + '/' + PLUGIN_NAME
-TEMPLATE_PATH = PLUGIN_PATH + '/template/'
+PACKAGES_PATH = sublime.packages_path()
+PLUGIN_PATH = os.path.join(PACKAGES_PATH, PLUGIN_NAME)
+TEMPLATE_PATH = os.path.join(PLUGIN_PATH, 'template')
 
 sys.path.insert(0, PLUGIN_PATH)
+
+def plugin_loaded():
+    '''ST3'''
+
+    if not os.path.exists(PLUGIN_PATH):
+        os.mkdir(PLUGIN_PATH)
+
+        if os.path.exists(INSTALLED_PLGIN_PATH):
+            z = zipfile.ZipFile(INSTALLED_PLGIN_PATH, 'r')
+            for f in z.namelist():
+                z.extract(f, extract_dir)
+            z.close()
 
 def Window():
     '''Get current act``ive window'''
@@ -358,3 +371,4 @@ class UpdateModifiedTimeListener(sublime_plugin.EventListener):
                                  {'a': region.a, 
                                   'b': region.b,
                                   'strings': time})
+                
