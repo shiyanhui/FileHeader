@@ -12,10 +12,13 @@ import threading
 from datetime import datetime
 
 ROOT_PATH = os.path.abspath(os.path.dirname(__file__))
-TEMPLATE_PATH = ROOT_PATH + '/template/'
-PLUGIN_NAME = 'FileHeader'
 
-sys.path.insert(0, ROOT_PATH)
+PACKAGES_PATH = sublime.packages_path()
+PLUGIN_NAME = 'FileHeader'
+PLUGIN_PATH = PACKAGES_PATH + '/' + PLUGIN_NAME
+TEMPLATE_PATH = PLUGIN_PATH + '/template/'
+
+sys.path.insert(0, PLUGIN_PATH)
 
 def Window():
     '''Get current act``ive window'''
@@ -31,7 +34,6 @@ def get_template(syntax_type):
     '''Get template correspond `syntax_type`'''
 
     tmpl_name = '%s.tmpl' % syntax_type
-
     tmpl_file = os.path.join(TEMPLATE_PATH, tmpl_name)
 
     options = Settings().get('options')
