@@ -9,14 +9,25 @@
         */
         "time_format": 0,
         /*
-        Set your custom template path here, it is a directory in which you 
-        write your own .tmpl files. The file name should be a language, 
+        Set your custom template header path here, it is a directory in which 
+        you write your own header files. The file name should be a language, 
+        "Python.tmpl" for example. 
+        */
+        "custom_template_header_path": "",
+        /*
+        Set your custom template body path here, it is a directory in which 
+        you write your own body files. The file name should be a language, 
         "Python.tmpl" for example. 
 
-        FileHeader will search your custom path prior, and FileHeader will use 
-        the default .tmpl file if fail.
+        The tempalte structure is:
+
+            I am a file
+            -----------
+            header
+            body
+
         */
-        "custom_template_path": "",
+        "custom_template_body_path": "",
         /*
         Whether show input panel when you add header. The default file which 
         you add header to is the current file you edit.
@@ -71,12 +82,14 @@
             "tex": "LaTeX",
             "lisp": "Lisp",
             "lua": "Lua",
+            "md": "Markdown",
             "mat": "Matlab",
             "cc": "Objective-C",
             "pas": "Pascal",
             "pl": "Perl",
             "php": "PHP",
             "py": "Python",
+            "rst": "RestructuredText",
             "rb": "Ruby",
             "scala": "Scala",
             "sh": "ShellScript",

@@ -108,14 +108,25 @@ There are three kinds of arguments, **options**, **Default** and kinds of langua
             */
             "time_format": 0,
             /*
-            Set your custom template path here, it is a directory in which you 
-            write your own .tmpl files. The file name should be a language, 
+            Set your custom template header path here, it is a directory in which 
+            you write your own header files. The file name should be a language, 
+            "Python.tmpl" for example. 
+            */
+            "custom_template_header_path": "",
+            /*
+            Set your custom template body path here, it is a directory in which 
+            you write your own body files. The file name should be a language, 
             "Python.tmpl" for example. 
 
-            FileHeader will search your custom path prior, and FileHeader will
-            use the default .tmpl file if fail.
+            The tempalte structure is:
+
+                I am a file
+                -----------
+                header
+                body
+
             */
-            "custom_template_path": "",
+            "custom_template_body_path": "",
             /*
             Whether show input panel when you add header. The default file which 
             you add header to is the current file you edit.
@@ -126,6 +137,16 @@ There are three kinds of arguments, **options**, **Default** and kinds of langua
             directory.
             */
             "open_file_when_add_header_to_directory": true,
+            /*
+            Whether enable add header to hidden directory. If false, FileHeader 
+            won't add header to files under it. 
+            */
+            "enable_add_header_to_hidden_dir": false,
+            /*
+            Whether enable add header to hidden file. If false, FileHeader 
+            won't add header to it. 
+            */
+            "enable_add_header_to_hidden_file": false,
             /*
             FileHeader judges programming language according file suffix.
 
@@ -160,12 +181,14 @@ There are three kinds of arguments, **options**, **Default** and kinds of langua
                 "tex": "LaTeX",
                 "lisp": "Lisp",
                 "lua": "Lua",
+                "md": "Markdown",
                 "mat": "Matlab",
                 "cc": "Objective-C",
                 "pas": "Pascal",
                 "pl": "Perl",
                 "php": "PHP",
                 "py": "Python",
+                "rst": "RestructuredText",
                 "rb": "Ruby",
                 "scala": "Scala",
                 "sh": "ShellScript",
@@ -207,7 +230,7 @@ There are three kinds of arguments, **options**, **Default** and kinds of langua
                 FileHeader will set it automatically. If it's in
                 a git repository and the `user.name` has been set, `autor` 
                 will set to `user.name`, otherwise it will be set to current 
-                system logined user.
+                system logined user. 
 
                 Can be set custom.
 
@@ -274,13 +297,15 @@ There are three kinds of arguments, **options**, **Default** and kinds of langua
         "YAML": {}
     }
 
-
 Template
 ========
 
-FileHeader use Jinja2_ template, find out how to use it `here <http://jinja.pocoo.org/docs/>`_. You also can write you own templates. Take **Python.tmpl** for example.
+FileHeader use Jinja2_ template, find out how to use it `here <http://jinja.pocoo.org/docs/>`_. 
 
-    .. code-block:: c++
+The template is made up of **header** and **body**.  You also can write you 
+own templates. Take the Python template header **Python.tmpl** for example.
+
+    .. code-block:: ++
 
         # -*- coding: utf-8 -*-
         # @Author: {{author}}
@@ -290,5 +315,19 @@ FileHeader use Jinja2_ template, find out how to use it `here <http://jinja.poco
         # @Last Modified time: {{last_modified_time}}
 
 **{{ }}** is variable, you can set it in setting files. **create_time** will be set when you create a new file using FileHeader, **last_modified_time** and **last_modified_by** will be update every time you save your file.
+
+You can define your functions and classes or other contents in your **body** 
+file.  Also take Python template body for example.
+    
+    .. code-block:: python
+
+        def main():
+            pass
+
+        class MainClass(object):
+            pass
+
+        if __name__ == '__main__':
+            pass
 
 .. _Jinja2: http://jinja.pocoo.org/docs/

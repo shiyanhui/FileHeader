@@ -4,7 +4,7 @@
 # @Date:   2013-10-28 13:39:48
 # @Email:  shiyanhui66@gmail.com
 # @Last modified by:   lime
-# @Last Modified time: 2013-11-01 15:13:16
+# @Last Modified time: 2013-11-01 17:19:29
 
 import os
 import sys
@@ -15,6 +15,7 @@ import functools
 import threading
 import zipfile
 import getpass
+import shutil
 
 from datetime import datetime
 
@@ -26,7 +27,8 @@ else:
 PLUGIN_NAME = 'FileHeader'
 PACKAGES_PATH = sublime.packages_path()
 PLUGIN_PATH = os.path.join(PACKAGES_PATH, PLUGIN_NAME)
-TEMPLATE_PATH = os.path.join(PLUGIN_PATH, 'template')
+HEADER_PATH = os.path.join(PLUGIN_PATH, 'template/header')
+BODY_PATH = os.path.join(PLUGIN_PATH, 'template/body')
 INSTALLED_PLGIN_PATH = os.path.abspath(os.path.dirname(__file__))
 
 sys.path.insert(0, PLUGIN_PATH)
@@ -36,12 +38,14 @@ def plugin_loaded():
 
     global PACKAGES_PATH
     global PLUGIN_PATH
-    global TEMPLATE_PATH
+    global HEADER_PATH
+    global BODY_PATH
 
     PACKAGES_PATH = sublime.packages_path()
     PLUGIN_PATH = os.path.join(PACKAGES_PATH, PLUGIN_NAME)
-    TEMPLATE_PATH = os.path.join(PLUGIN_PATH, 'template')
-    
+    HEADER_PATH = os.path.join(PLUGIN_PATH, 'template/header')
+    BODY_PATH = os.path.join(PLUGIN_PATH, 'template/body')
+
     sys.path.insert(0, PLUGIN_PATH)
 
     if not os.path.exists(PLUGIN_PATH):
@@ -63,14 +67,15 @@ def Settings():
 
     return sublime.load_settings('%s.sublime-settings' % PLUGIN_NAME)
 
-def get_template(syntax_type):
-    '''Get template correspond `syntax_type`'''
-    
+def get_template_part(syntax_type, part):
+    '''Get template header or body'''
+
     tmpl_name = '%s.tmpl' % syntax_type
-    tmpl_file = os.path.join(TEMPLATE_PATH, tmpl_name)
+    path = HEADER_PATH if part == 'header' else BODY_PATH
+    tmpl_file = os.path.join(path, tmpl_name)
 
     options = Settings().get('options')
-    custom_template_path = options['custom_template_path']
+    custom_template_path = options['custom_template_%s_path' % part]
     if custom_template_path:
         _ = os.path.join(custom_template_path, tmpl_name)
         if os.path.exists(_) and os.path.isfile(_):
@@ -84,6 +89,10 @@ def get_template(syntax_type):
         sublime.error_message(str(e))
         contents = ''
     return contents
+
+def get_template(syntax_type):
+    parts = ['header', 'body']
+    return ''.join([get_template_part(syntax_type, part) for part in parts])
 
 def get_strftime():
     '''Get `time_format` setting'''
@@ -131,12 +140,16 @@ def get_args(syntax_type):
 
     return args
 
-def render_template(syntax_type):
+def render_template(syntax_type, part=None):
     '''Render the template correspond `syntax_type`'''
 
     from jinja2 import Template
     try:
-        template = Template(get_template(syntax_type))
+        if part is not None:
+            template = Template(get_template_part(syntax_type, part))
+        else:
+            template = Template(get_template(syntax_type))
+
         render_string = template.render(get_args(syntax_type))
     except Exception as e:
         sublime.error_message(str(e))
@@ -264,7 +277,7 @@ class BackgroundAddHeaderThread(threading.Thread):
 
     def run(self):
         syntax_type = get_syntax_type(self.path)
-        header = render_template(syntax_type)
+        header = render_template(syntax_type, 'header')
 
         try:
             with open(self.path, 'r') as f:
@@ -283,7 +296,7 @@ class AddFileHeaderCommand(sublime_plugin.TextCommand):
 
     def run(self, edit, path):
         syntax_type = get_syntax_type(path)
-        header = render_template(syntax_type)
+        header = render_template(syntax_type, 'header')
         self.view.insert(edit, 0, header)
 
 class FileHeaderAddHeaderCommand(sublime_plugin.WindowCommand):
