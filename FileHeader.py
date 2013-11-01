@@ -4,7 +4,7 @@
 # @Date:   2013-10-28 13:39:48
 # @Email:  shiyanhui66@gmail.com
 # @Last modified by:   lime
-# @Last Modified time: 2013-11-01 12:17:11
+# @Last Modified time: 2013-11-01 15:13:16
 
 import os
 import sys
@@ -17,6 +17,11 @@ import zipfile
 import getpass
 
 from datetime import datetime
+
+if sys.version < '3':
+    import commands as process
+else:    
+    import subprocess as process
 
 PLUGIN_NAME = 'FileHeader'
 PACKAGES_PATH = sublime.packages_path()
@@ -61,8 +66,6 @@ def Settings():
 def get_template(syntax_type):
     '''Get template correspond `syntax_type`'''
     
-    print(TEMPLATE_PATH)
-    
     tmpl_name = '%s.tmpl' % syntax_type
     tmpl_file = os.path.join(TEMPLATE_PATH, tmpl_name)
 
@@ -96,11 +99,6 @@ def get_strftime():
 def get_user():
     '''Get user'''
 
-    if sys.version < '3':
-        import commands as process
-    else:    
-        import subprocess as process
-          
     user = getpass.getuser()
     status, _ = process.getstatusoutput('git status')
     if status == 0:
@@ -187,7 +185,6 @@ def block(view, callback, *args, **kwargs):
 
     _block()
 
-
 class FileHeaderNewFileCommand(sublime_plugin.WindowCommand):
     '''Create a new file with header'''
 
@@ -258,7 +255,6 @@ class FileHeaderNewFileCommand(sublime_plugin.WindowCommand):
         Window().show_input_panel(caption, '', functools.partial(
                                   self.on_done, path), None, None)
 
-
 class BackgroundAddHeaderThread(threading.Thread):
     '''Add header in background.'''
 
@@ -267,7 +263,6 @@ class BackgroundAddHeaderThread(threading.Thread):
         super(BackgroundAddHeaderThread, self).__init__()
 
     def run(self):
-            
         syntax_type = get_syntax_type(self.path)
         header = render_template(syntax_type)
 
@@ -294,6 +289,51 @@ class AddFileHeaderCommand(sublime_plugin.TextCommand):
 class FileHeaderAddHeaderCommand(sublime_plugin.WindowCommand):
     '''Conmmand: add `header` in a file or directory'''
 
+    def is_hidden(self, path):
+        '''Whether the file or dir is hidden'''
+
+        hidden = False
+        platform = sublime.platform()
+        if platform == 'windows':
+            status, output = process.getstatusoutput('attrib %s' % path)
+            if status == 0:
+                try:
+                    if output[4].upper() == 'H':
+                        hidden = True
+                except:
+                    pass
+        else:
+            basename = os.path.basename(path)
+            if basename.startswith('.'):
+                hidden = True
+        return hidden
+
+    def can_add(self, path):
+        '''Whether can add header to path'''
+
+        def can_add_to_dir(path):
+           return enable_add_to_hidden_dir or (not enable_add_to_hidden_dir and
+                                               not self.is_hidden(path))
+
+        if not os.path.exists(path):
+            return False
+
+        options = Settings().get('options')
+        file_suffix_mapping = options['file_suffix_mapping']
+        enable_add_to_hidden_dir = options['enable_add_header_to_hidden_dir']
+        enable_add_to_hidden_file = options['enable_add_header_to_hidden_file']
+
+        if os.path.isfile(path):
+            if can_add_to_dir(os.path.dirname(path)):
+                if enable_add_to_hidden_file or (not enable_add_to_hidden_file
+                                                 and not self.is_hidden(path)):
+                        return True
+
+        elif os.path.isdir(path):
+            return can_add_to_dir(path)
+
+        return False
+
     def add(self, path):
         '''Add to a file'''
 
@@ -315,7 +355,8 @@ class FileHeaderAddHeaderCommand(sublime_plugin.WindowCommand):
         for root, subdirs, files in os.walk(path):
             for f in files:
                 file_name = os.path.join(root, f)
-                self.add(file_name)
+                if self.can_add(file_name):
+                    self.add(file_name)
                 
     def on_done(self, path):
         if not path:
@@ -326,10 +367,10 @@ class FileHeaderAddHeaderCommand(sublime_plugin.WindowCommand):
             return
 
         path = os.path.abspath(path)
-
-        if os.path.isfile(path):
+        if os.path.isfile(path) and self.can_add(path):
             self.add(path)
-        elif os.path.isdir(path):
+
+        elif os.path.isdir(path) and self.can_add(path):
             self.walk(path)
 
     def run(self, paths=[]):

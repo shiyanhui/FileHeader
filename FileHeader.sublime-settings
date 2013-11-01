@@ -28,6 +28,16 @@
         */
         "open_file_when_add_header_to_directory": true,
         /*
+        Whether enable add header to hidden directory. If false, FileHeader 
+        won't add header to files under it. 
+        */
+        "enable_add_header_to_hidden_dir": false,
+        /*
+        Whether enable add header to hidden file. If false, FileHeader 
+        won't add header to it. 
+        */
+        "enable_add_header_to_hidden_file": false,
+        /*
         FileHeader judges programming language according file suffix.
 
         Default programming language if FileHeader judges failed when you
