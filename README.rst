@@ -85,7 +85,7 @@ Add header to files in the specified directory
 
     .. image:: https://raw.github.com/shiyanhui/shiyanhui.github.io/master/images/FileHeader/add-header-dir.gif
 
-A very important feature of FileHeader is that it can automatically update **last_modified_time** and **last_modified_by**(see options below). Just look this picture, take care of the **@Last modified time:** before save and after save: 
+A very important feature of FileHeader is that it can automatically update **last_modified_time** and **last_modified_by** (see options below). Just look this picture, take care of the **@Last modified time:** before save and after save: 
 
 .. image:: https://raw.github.com/shiyanhui/shiyanhui.github.io/master/images/FileHeader/update.gif
 
