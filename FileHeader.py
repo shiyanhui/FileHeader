@@ -4,7 +4,7 @@
 # @Date:   2013-10-28 13:39:48
 # @Email:  shiyanhui66@gmail.com
 # @Last modified by:   lime
-# @Last Modified time: 2013-11-01 21:14:29
+# @Last Modified time: 2013-11-01 22:42:46
 
 import os
 import sys
@@ -463,7 +463,6 @@ class UpdateModifiedTimeListener(sublime_plugin.EventListener):
                         break       
 
                 line_header = line_header.replace('*', '\*')
-                print(line_header)
                 if what == 'BY':
                     line_pattern = '%s.*\n' % line_header
                 else:
