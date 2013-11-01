@@ -86,7 +86,7 @@ Add header to files in the specified directory
 
     .. image:: https://raw.github.com/shiyanhui/shiyanhui.github.io/master/images/FileHeader/add_header_in_dir.gif
 
-A very important feature of FileHeader is that it can automic update last modified time of file. Just look this picture, take care of the **@Last modified:** before save and after save: 
+A very important feature of FileHeader is that it can automatically update last modified time of file. Just look this picture, take care of the **@Last modified:** before save and after save: 
 
 .. image:: https://raw.github.com/shiyanhui/shiyanhui.github.io/master/images/FileHeader/update_time.gif
 
@@ -290,6 +290,6 @@ FileHeader use Jinja2_ template, find out how to use it `here <http://jinja.poco
         # @Last modified by:   {{last_modified_by}}
         # @Last Modified time: {{last_modified_time}}
 
-**{{ }}** is variable, you can set it in setting files. **create_time** will be automic set when you create a new file using FileHeader, and **modified_time** will be update every time you save your file. 
+**{{ }}** is variable, you can set it in setting files. **create_time** will be set when you create a new file using FileHeader, **last_modified_time** and **last_modified_by** will be update every time you save your file.
 
 .. _Jinja2: http://jinja.pocoo.org/docs/
