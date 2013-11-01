@@ -47,17 +47,21 @@ def plugin_loaded():
     BODY_PATH = os.path.join(PLUGIN_PATH, 'template/body')
 
     sys.path.insert(0, PLUGIN_PATH)
-
-    shutil.rmtree(PLUGIN_PATH)
+    
+    if os.path.exists(PLUGIN_PATH):
+        try:
+            shutil.rmtree(PLUGIN_PATH)
+        except:
+            pass
     
     if not os.path.exists(PLUGIN_PATH):
         os.mkdir(PLUGIN_PATH)
 
-        if os.path.exists(INSTALLED_PLGIN_PATH):
-            z = zipfile.ZipFile(INSTALLED_PLGIN_PATH, 'r')
-            for f in z.namelist():
-                z.extract(f, PLUGIN_PATH)
-            z.close()
+    if os.path.exists(INSTALLED_PLGIN_PATH):
+        z = zipfile.ZipFile(INSTALLED_PLGIN_PATH, 'r')
+        for f in z.namelist():
+            z.extract(f, PLUGIN_PATH)
+        z.close()
 
 def Window():
     '''Get current act``ive window'''
