@@ -16,13 +16,12 @@ Features
 - Add new file with initial contents.
 - Add header to an existed file or directory.
 - Batch add header to files in the specified dircetory.
+- Auto update file last modified time and last modified by.
 - Auto detect file type.
 - Powerful template with Jinja2_.
 - Custom templates supported.
 - Rich languages supported.
-- Auto update file last modified time and last modified by.
 - Support both Sublime Text 2 and Sublime Text 3.
-
 
 Installation
 ============

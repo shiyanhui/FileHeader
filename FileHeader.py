@@ -4,7 +4,7 @@
 # @Date:   2013-10-28 13:39:48
 # @Email:  shiyanhui66@gmail.com
 # @Last modified by:   lime
-# @Last Modified time: 2013-11-01 11:15:20
+# @Last Modified time: 2013-11-01 11:47:18
 
 import os
 import sys
@@ -18,18 +18,25 @@ import getpass
 
 from datetime import datetime
 
-INSTALLED_PLGIN_PATH = os.path.abspath(os.path.dirname(__file__))
-
 PLUGIN_NAME = 'FileHeader'
 PACKAGES_PATH = sublime.packages_path()
 PLUGIN_PATH = os.path.join(PACKAGES_PATH, PLUGIN_NAME)
 TEMPLATE_PATH = os.path.join(PLUGIN_PATH, 'template')
+INSTALLED_PLGIN_PATH = os.path.abspath(os.path.dirname(__file__))
 
 sys.path.insert(0, PLUGIN_PATH)
 
 def plugin_loaded():
     '''ST3'''
 
+    global PACKAGES_PATH
+    global PLUGIN_PATH
+    global TEMPLATE_PATH
+
+    PACKAGES_PATH = sublime.packages_path()
+    PLUGIN_PATH = os.path.join(PACKAGES_PATH, PLUGIN_NAME)
+    TEMPLATE_PATH = os.path.join(PLUGIN_PATH, 'template')
+    
     if not os.path.exists(PLUGIN_PATH):
         os.mkdir(PLUGIN_PATH)
 
@@ -51,7 +58,9 @@ def Settings():
 
 def get_template(syntax_type):
     '''Get template correspond `syntax_type`'''
-
+    
+    print(TEMPLATE_PATH)
+    
     tmpl_name = '%s.tmpl' % syntax_type
     tmpl_file = os.path.join(TEMPLATE_PATH, tmpl_name)
 
