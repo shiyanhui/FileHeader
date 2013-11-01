@@ -4,7 +4,7 @@
 # @Date:   2013-10-28 13:39:48
 # @Email:  shiyanhui66@gmail.com
 # @Last modified by:   lime
-# @Last Modified time: 2013-11-01 17:19:29
+# @Last Modified time: 2013-11-01 20:42:17
 
 import os
 import sys
@@ -183,6 +183,9 @@ def get_syntax_file(syntax_type):
         'TCL': 'Tcl',
         'Text': 'Plain text',
     }
+
+    if syntax_type == 'C':
+        syntax_type = 'C++'
 
     tmL = lang2tmL.get(syntax_type, syntax_type)
     return 'Packages/%s/%s.tmLanguage' % (syntax_type, tmL)
@@ -438,7 +441,7 @@ class UpdateModifiedTimeListener(sublime_plugin.EventListener):
     def update_last_modified(self, view, what):
         what = what.upper()
         syntax_type = get_syntax_type(view.file_name())
-        template = get_template(syntax_type)    
+        template = get_template_part(syntax_type, 'header')    
         lines = template.split('\n')
 
         line_pattern = None
@@ -455,8 +458,10 @@ class UpdateModifiedTimeListener(sublime_plugin.EventListener):
                     if line[i] != ' ':
                         space_start = i + 1
                         line_header = line[: space_start]
-                        break        
+                        break       
 
+                line_header = line_header.replace('*', '\*')
+                print(line_header)
                 if what == 'BY':
                     line_pattern = '%s.*\n' % line_header
                 else:
@@ -478,7 +483,6 @@ class UpdateModifiedTimeListener(sublime_plugin.EventListener):
                     strftime = get_strftime()
                     time = datetime.now().strftime(strftime)
                     strings = (spaces + time)
-                
                 view.run_command('file_header_replace', 
                                  {'a': a, 'b': b,'strings': strings})
 
