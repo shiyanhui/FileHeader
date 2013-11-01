@@ -120,8 +120,8 @@ There are three kinds of arguments, **options**, **Default** and kinds of langua
 
             The tempalte structure is:
 
-                I am a file
-                -----------
+                I am a template
+                ---------------
                 header
                 body
 
@@ -165,29 +165,33 @@ There are three kinds of arguments, **options**, **Default** and kinds of langua
                 "scpt": "AppleScript",
                 "asp": "ASP",
                 "aspx": "ASP",
-                "c": "C++",
+                "bat": "Batch File",
+                "c": "C",
                 "cs": "C#",
                 "cpp": "C++",
                 "clj": "Clojure",
                 "css": "CSS",
-                "d": "D",
+                "D": "D",
                 "erl": "Erlang",
                 "go": "Go",
+                "groovy": "Groovy",
                 "hs": "Haskell",
                 "htm": "HTML",
                 "html": "HTML",
                 "java": "Java",
                 "js": "JavaScript",
                 "tex": "LaTeX",
-                "lisp": "Lisp",
+                "lsp": "Lisp",
                 "lua": "Lua",
                 "md": "Markdown",
                 "mat": "Matlab",
-                "cc": "Objective-C",
-                "pas": "Pascal",
+                "m": "Objective-C",
+                "ml": "OCaml",
+                "p": "Pascal",
                 "pl": "Perl",
                 "php": "PHP",
                 "py": "Python",
+                "R": "R",
                 "rst": "RestructuredText",
                 "rb": "Ruby",
                 "scala": "Scala",
