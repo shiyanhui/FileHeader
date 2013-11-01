@@ -4,7 +4,7 @@
 # @Date:   2013-10-28 13:39:48
 # @Email:  shiyanhui66@gmail.com
 # @Last modified by:   lime
-# @Last Modified time: 2013-11-01 11:47:18
+# @Last Modified time: 2013-11-01 12:17:11
 
 import os
 import sys
@@ -37,6 +37,8 @@ def plugin_loaded():
     PLUGIN_PATH = os.path.join(PACKAGES_PATH, PLUGIN_NAME)
     TEMPLATE_PATH = os.path.join(PLUGIN_PATH, 'template')
     
+    sys.path.insert(0, PLUGIN_PATH)
+
     if not os.path.exists(PLUGIN_PATH):
         os.mkdir(PLUGIN_PATH)
 
