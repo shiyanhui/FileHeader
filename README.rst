@@ -5,15 +5,16 @@ FileHeader
 Overview
 ========
 
-FileHeader is a plugin for ST2/ST3. It makes it easier to create new file with initial contents. It also can add new header to an existed file or directory.
+FileHeader is a file templating plugin for SublimeText 2 and SublimeText 3. It makes it easier to create new file with initial contents. It also can add new header to an existed file or directory.
 
-:Info: File header manager for Sublime Text 2 and Sublime Text 3.
+:Info: FileHeader, a file templating plugin for ST2/ST3.
 :Author: Lime YH.Shi
 
 Features
 =========
 
 - Add new file with initial contents.
+- Auto detect **New File** action from SulimeText or other plugin.
 - Add header to an existed file or directory.
 - Batch add header to files in the specified dircetory.
 - Auto update file last modified time and last modified by.

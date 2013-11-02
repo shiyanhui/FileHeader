@@ -4,7 +4,7 @@
 # @Date:   2013-10-28 13:39:48
 # @Email:  shiyanhui66@gmail.com
 # @Last modified by:   lime
-# @Last Modified time: 2013-11-01 22:42:46
+# @Last Modified time: 2013-11-02 22:20:18
 
 import os
 import sys
@@ -48,20 +48,20 @@ def plugin_loaded():
 
     sys.path.insert(0, PLUGIN_PATH)
     
-    if os.path.exists(PLUGIN_PATH):
-        try:
-            shutil.rmtree(PLUGIN_PATH)
-        except:
-            pass
+    # if os.path.exists(PLUGIN_PATH):
+    #     try:
+    #         shutil.rmtree(PLUGIN_PATH)
+    #     except:
+    #         pass
     
-    if not os.path.exists(PLUGIN_PATH):
-        os.mkdir(PLUGIN_PATH)
+    # if not os.path.exists(PLUGIN_PATH):
+    #     os.mkdir(PLUGIN_PATH)
 
-    if os.path.exists(INSTALLED_PLGIN_PATH):
-        z = zipfile.ZipFile(INSTALLED_PLGIN_PATH, 'r')
-        for f in z.namelist():
-            z.extract(f, PLUGIN_PATH)
-        z.close()
+    # if os.path.exists(INSTALLED_PLGIN_PATH):
+    #     z = zipfile.ZipFile(INSTALLED_PLGIN_PATH, 'r')
+    #     for f in z.namelist():
+    #         z.extract(f, PLUGIN_PATH)
+    #     z.close()
 
 def Window():
     '''Get current act``ive window'''
