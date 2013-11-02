@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <link href='https://fonts.googleapis.com/css?family=Chivo:900' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print" />
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <title>Fileheader by shiyanhui</title>
+  </head>
+
+  <body>
+    <div id="container">
+      <div class="inner">
+
+        <header>
+          <h1>Fileheader</h1>
+          <h2>File header plugin for ST2/ST3</h2>
+        </header>
+
+        <section id="downloads" class="clearfix">
+          <a href="https://github.com/shiyanhui/FileHeader/zipball/master" id="download-zip" class="button"><span>Download .zip</span></a>
+          <a href="https://github.com/shiyanhui/FileHeader/tarball/master" id="download-tar-gz" class="button"><span>Download .tar.gz</span></a>
+          <a href="https://github.com/shiyanhui/FileHeader" id="view-on-github" class="button"><span>View on GitHub</span></a>
+        </section>
+
+        <hr>
+
+        <section id="main_content">
+          <h1></h1>
+
+<h1>
+<a name="fileheader" class="anchor" href="#fileheader"><span class="octicon octicon-link"></span></a>FileHeader</h1>
+
+<h1>
+<a name="overview" class="anchor" href="#overview"><span class="octicon octicon-link"></span></a>Overview</h1>
+
+<p>FileHeader is a plugin for ST2/ST3. It makes it easier to create new file with initial contents. It also can add new header to an existed file or directory.</p>
+
+<p>:Info: File header manager for Sublime Text 2 and Sublime Text 3.
+:Author: Lime YH.Shi</p>
+
+<h1>
+<a name="features" class="anchor" href="#features"><span class="octicon octicon-link"></span></a>Features</h1>
+
+<ul>
+<li>Add new file with initial contents.</li>
+<li>Add header to an existed file or directory.</li>
+<li>Batch add header to files in the specified dircetory.</li>
+<li>Auto update file last modified time and last modified by.</li>
+<li>Auto detect file type.</li>
+<li>Powerful template with Jinja2_.</li>
+<li>Custom templates supported.</li>
+<li>Rich languages supported.</li>
+<li>Support both Sublime Text 2 and Sublime Text 3.</li>
+</ul><h1>
+<a name="installation" class="anchor" href="#installation"><span class="octicon octicon-link"></span></a>Installation</h1>
+
+<h2>
+<a name="package-control" class="anchor" href="#package-control"><span class="octicon octicon-link"></span></a>Package Control</h2>
+
+<p>Install <code>Package Control</code>_. Then <strong>Package Control: Install Package</strong>, look for <strong>FileHeader</strong> and install it.</p>
+
+<p>.. _Package Control: <a href="https://sublime.wbond.net/">https://sublime.wbond.net/</a></p>
+
+<h2>
+<a name="source-installation" class="anchor" href="#source-installation"><span class="octicon octicon-link"></span></a>Source Installation</h2>
+
+<p>Go to the "Packages" directory <strong>(Preferences / Browse Packages)</strong>. Then clone this repository::</p>
+
+<pre><code>git clone git@github.com:shiyanhui/FileHeader.git
+</code></pre>
+
+<p>Or download zip from Github, and put it in "Packages" directory <strong>(Preferences / Browse Packages)</strong>.</p>
+
+<h2>
+<a name="releases" class="anchor" href="#releases"><span class="octicon octicon-link"></span></a>Releases</h2>
+
+<p>See releases and logs <code>here &lt;https://github.com/shiyanhui/FileHeader/releases&gt;</code>_, it's stable.</p>
+
+<h1>
+<a name="usage" class="anchor" href="#usage"><span class="octicon octicon-link"></span></a>Usage</h1>
+
+<h2>
+<a name="create-a-new-file" class="anchor" href="#create-a-new-file"><span class="octicon octicon-link"></span></a>Create a new file</h2>
+
+<ul>
+<li>
+<p>Sidebar menu</p>
+
+<p>.. image:: <a href="https://raw.github.com/shiyanhui/shiyanhui.github.io/master/images/FileHeader/new-file.gif">https://raw.github.com/shiyanhui/shiyanhui.github.io/master/images/FileHeader/new-file.gif</a></p>
+</li>
+<li>
+<p>Shortcuts    </p>
+
+<p>The default shortcuts is <strong>super+alt+n</strong> on OS X, <strong>ctrl+alt+n</strong> on Windows and Linux.</p>
+</li>
+<li>
+<p>Context menu</p>
+
+<p>Similar to <strong>Sidebar menu</strong>.</p>
+</li>
+</ul><h2>
+<a name="add-header-to-an-existed-file" class="anchor" href="#add-header-to-an-existed-file"><span class="octicon octicon-link"></span></a>Add header to an existed file</h2>
+
+<ul>
+<li>
+<p>Sidebar menu</p>
+
+<p>.. image:: <a href="https://raw.github.com/shiyanhui/shiyanhui.github.io/master/images/FileHeader/add-header.gif">https://raw.github.com/shiyanhui/shiyanhui.github.io/master/images/FileHeader/add-header.gif</a></p>
+</li>
+<li>
+<p>Shortcuts</p>
+
+<p>The default shortcuts is <strong>super+alt+a</strong> on OS X, <strong>ctrl+alt+a</strong> on Windows and Linux.</p>
+</li>
+<li>
+<p>Context menu</p>
+
+<p>Similar to <strong>Sidebar menu</strong>.</p>
+</li>
+</ul><h2>
+<a name="add-header-to-files-in-the-specified-directory" class="anchor" href="#add-header-to-files-in-the-specified-directory"><span class="octicon octicon-link"></span></a>Add header to files in the specified directory</h2>
+
+<pre><code>.. image:: https://raw.github.com/shiyanhui/shiyanhui.github.io/master/images/FileHeader/add-header-dir.gif
+</code></pre>
+
+<p>A very important feature of FileHeader is that it can automatically update <strong>last_modified_time</strong> and <strong>last_modified_by</strong> (see options below). Just look this picture, take care of the <strong><a href="https://github.com/Last" class="user-mention">@Last</a> modified time:</strong> before save and after save: </p>
+
+<p>.. image:: <a href="https://raw.github.com/shiyanhui/shiyanhui.github.io/master/images/FileHeader/update.gif">https://raw.github.com/shiyanhui/shiyanhui.github.io/master/images/FileHeader/update.gif</a></p>
+
+<h1>
+<a name="settings" class="anchor" href="#settings"><span class="octicon octicon-link"></span></a>Settings</h1>
+
+<p>There are three kinds of arguments, <strong>options</strong>, <strong>Default</strong> and kinds of languages variables settings. <strong>options</strong> is the functional setting, <strong>Default</strong> is the default language variables settings. Language variables setting will cover that in <strong>Default</strong>.</p>
+
+<p>.. code-block:: c++</p>
+
+<pre><code>{
+    "options": {
+        /*
+        The datetime format.
+
+            0: "%Y-%m-%d %H:%M:%S"
+            1: "%Y-%m-%d"
+            2: "%H:%M:%S"
+        */
+        "time_format": 0,
+        /*
+        Set your custom template header path here, it is a directory in which 
+        you write your own header files. The file name should be a language, 
+        "Python.tmpl" for example. 
+        */
+        "custom_template_header_path": "",
+        /*
+        Set your custom template body path here, it is a directory in which 
+        you write your own body files. The file name should be a language, 
+        "Python.tmpl" for example. 
+
+        The tempalte structure is:
+
+            I am a template
+            ---------------
+            header
+            body
+
+        */
+        "custom_template_body_path": "",
+        /*
+        Whether show input panel when you add header. The default file which 
+        you add header to is the current file you edit.
+        */
+        "show_input_panel_when_add_header": true,
+        /*
+        Whether open file when you add header to files in the specified 
+        directory.
+        */
+        "open_file_when_add_header_to_directory": true,
+        /*
+        Whether enable add header to hidden directory. If false, FileHeader 
+        won't add header to files under it. 
+        */
+        "enable_add_header_to_hidden_dir": false,
+        /*
+        Whether enable add header to hidden file. If false, FileHeader 
+        won't add header to it. 
+        */
+        "enable_add_header_to_hidden_file": false,
+        /*
+        FileHeader judges programming language according file suffix.
+
+        Default programming language if FileHeader judges failed when you
+        create new file.
+        */
+        "syntax_when_not_match": "Text",
+        /*
+        FileHeader will judge programming language according to file suffix.
+        You can add more file suffix here. Note: language should be one of 
+        that under **Default**. If FileHeader don't find the suffix,
+        FileHeader will set language as **syntax_when_not_match** above.
+        */
+        "file_suffix_mapping":{
+            "as": "ActionScript",
+            "scpt": "AppleScript",
+            "asp": "ASP",
+            "aspx": "ASP",
+            "bat": "Batch File",
+            "c": "C",
+            "cs": "C#",
+            "cpp": "C++",
+            "clj": "Clojure",
+            "css": "CSS",
+            "D": "D",
+            "erl": "Erlang",
+            "go": "Go",
+            "groovy": "Groovy",
+            "hs": "Haskell",
+            "htm": "HTML",
+            "html": "HTML",
+            "java": "Java",
+            "js": "JavaScript",
+            "tex": "LaTeX",
+            "lsp": "Lisp",
+            "lua": "Lua",
+            "md": "Markdown",
+            "mat": "Matlab",
+            "m": "Objective-C",
+            "ml": "OCaml",
+            "p": "Pascal",
+            "pl": "Perl",
+            "php": "PHP",
+            "py": "Python",
+            "R": "R",
+            "rst": "RestructuredText",
+            "rb": "Ruby",
+            "scala": "Scala",
+            "sh": "ShellScript",
+            "sql": "SQL",
+            "tcl": "TCL",
+            "txt": "Text",
+            "xml": "XML"
+        }
+    } ,
+    // The default variables you render.
+    "Default": {
+        /*
+        Builtin Variables
+        =================
+
+        - create_time
+
+            The file created time. It will be automatically set when you create
+            a new file if you use it. 
+
+            Can't be set custom.
+
+        - author
+
+            The file creator. 
+
+            FileHeader will set it automatically. If it's in
+            a git repository and the `user.name` has been set, `autor` 
+            will set to `user.name`, otherwise it will be set to current 
+            system user.
+
+            Can be set custom.
+
+        - last_modified_by
+
+            The file last modified by who? It is specially useful when 
+            cooperation programming. 
+
+            FileHeader will set it automatically. If it's in
+            a git repository and the `user.name` has been set, `autor` 
+            will set to `user.name`, otherwise it will be set to current 
+            system logined user. 
+
+            Can be set custom.
+
+        - last_modified_time
+
+            The file last modified time.
+
+            FileHeader will set it automatically when you save the file.
+
+            Can't be set custom
+        */
+
+        /*
+        Email
+        */
+        "email": "email@example.com"
+
+        // You can add more here......
+    },
+    /*
+    You can set different variables in different languages. It will cover 
+    that in "Default".
+    */
+    "ASP": {},
+    "ActionScript": {},
+    "AppleScript": {},
+    "Batch File": {},
+    "C#": {},
+    "C++": {},
+    "CSS": {},
+    "Clojure": {},
+    "D": {},
+    "Diff": {},
+    "Erlang": {},
+    "Go": {},
+    "Graphviz": {},
+    "Groovy": {},
+    "HTML": {},
+    "Haskell": {},
+    "Java": {},
+    "JavaScript": {},
+    "LaTeX": {},
+    "Lisp": {},
+    "Lua": {},
+    "Makefile": {},
+    "Markdown": {},
+    "Matlab": {},
+    "OCaml": {},
+    "Objective-C": {},
+    "PHP": {},
+    "Pascal": {},
+    "Perl": {},
+    "Python": {},
+    "R": {},
+    "RestructuredText": {},
+    "Ruby": {},
+    "SQL": {},
+    "Scala": {},
+    "ShellScript": {},
+    "TCL": {},
+    "Text": {},
+    "Textile": {},
+    "XML": {},
+    "YAML": {}
+}
+</code></pre>
+
+<h1>
+<a name="template" class="anchor" href="#template"><span class="octicon octicon-link"></span></a>Template</h1>
+
+<p>FileHeader use Jinja2_ template, find out how to use it <code>here &lt;http://jinja.pocoo.org/docs/&gt;</code>_. </p>
+
+<p>The template is made up of <strong>header</strong> and <strong>body</strong>.  You also can write you 
+own templates. Take the Python template header <strong>Python.tmpl</strong> for example.</p>
+
+<pre><code>.. code-block:: ++
+
+    # -*- coding: utf-8 -*-
+    # @Author: {{author}}
+    # @Date:   {{create_time}}
+    # @Email:  {{email}}
+    # @Last modified by:   {{last_modified_by}}
+    # @Last Modified time: {{last_modified_time}}
+</code></pre>
+
+<p><strong>{{ }}</strong> is variable, you can set it in setting files. <strong>create_time</strong> will be set when you create a new file using FileHeader, <strong>last_modified_time</strong> and <strong>last_modified_by</strong> will be update every time you save your file.</p>
+
+<p>You can define your functions and classes or other contents in your <strong>body</strong> 
+file.  Also take Python template body for example.</p>
+
+<pre><code>.. code-block:: python
+
+    def main():
+        pass
+
+    class MainClass(object):
+        pass
+
+    if __name__ == '__main__':
+        pass
+</code></pre>
+
+<p>.. _Jinja2: <a href="http://jinja.pocoo.org/docs/">http://jinja.pocoo.org/docs/</a></p>
+        </section>
+
+        <footer>
+          Fileheader is maintained by <a href="https://github.com/shiyanhui">shiyanhui</a><br>
+          This page was generated by <a href="http://pages.github.com">GitHub Pages</a>. Tactile theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.
+        </footer>
+
+        
+      </div>
+    </div>
+  </body>
+</html>
