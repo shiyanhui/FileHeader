@@ -4,7 +4,7 @@
 # @Date:   2013-10-28 13:39:48
 # @Email:  shiyanhui66@gmail.com
 # @Last modified by:   lime
-# @Last Modified time: 2013-11-02 22:20:18
+# @Last Modified time: 2013-11-02 22:37:22
 
 import os
 import sys
@@ -227,7 +227,7 @@ class FileHeaderNewFileCommand(sublime_plugin.WindowCommand):
 
         new_file = Window().open_file(path)
         block(new_file, new_file.set_syntax_file, get_syntax_file(syntax_type))
-        block(new_file, new_file.show_at_center, 0)
+        block(new_file, new_file.show, 0)
 
     def new_view(self, syntax_type, name):
         header = render_template(syntax_type)
@@ -303,10 +303,11 @@ class BackgroundAddHeaderThread(threading.Thread):
 class AddFileHeaderCommand(sublime_plugin.TextCommand):
     '''Command: add `header` in a file'''
 
-    def run(self, edit, path):
+    def run(self, edit, path, part=None):
         syntax_type = get_syntax_type(path)
-        header = render_template(syntax_type, 'header')
+        header = render_template(syntax_type, part)
         self.view.insert(edit, 0, header)
+
 
 class FileHeaderAddHeaderCommand(sublime_plugin.WindowCommand):
     '''Conmmand: add `header` in a file or directory'''
@@ -365,8 +366,8 @@ class FileHeaderAddHeaderCommand(sublime_plugin.WindowCommand):
         if whether_open_file:
             modified_file = Window().open_file(path)
             block(modified_file, modified_file.run_command, 
-                  'add_file_header', {'path': path})
-            block(modified_file, modified_file.show_at_center, 0)
+                  'add_file_header', {'path': path, 'part': 'header'})
+            block(modified_file, modified_file.show, 0)
         else:
             thread = BackgroundAddHeaderThread(path)
             thread.start()
@@ -426,11 +427,13 @@ class FileHeaderReplaceCommand(sublime_plugin.TextCommand):
         self.view.replace(edit, region, strings)
 
 
-class UpdateModifiedTimeListener(sublime_plugin.EventListener):
+class FileHeaderListener(sublime_plugin.EventListener):
     '''Auto update `last_modified_time` when save file'''
 
     MODIFIED_TIME_REGEX = re.compile('\{\{\s*last_modified_time\s*\}\}') 
-    MODIFIED_BY_REGEX = re.compile('\{\{\s*last_modified_by\s*\}\}')
+    MODIFIED_BY_REGEX   = re.compile('\{\{\s*last_modified_by\s*\}\}')
+
+    new_view_id = []
 
     def time_pattern(self):
         options = Settings().get('options')
@@ -452,8 +455,7 @@ class UpdateModifiedTimeListener(sublime_plugin.EventListener):
 
         line_pattern = None
         for line in lines:
-            regex = getattr(UpdateModifiedTimeListener, 'MODIFIED_%s_REGEX' %
-                            what)
+            regex = getattr(FileHeaderListener, 'MODIFIED_%s_REGEX' % what)
             search = regex.search(line)
 
             if search is not None:
@@ -491,7 +493,39 @@ class UpdateModifiedTimeListener(sublime_plugin.EventListener):
                 view.run_command('file_header_replace', 
                                  {'a': a, 'b': b,'strings': strings})
 
-    def on_pre_save(self, view):
+    def insert_template(self, view, exists):
+        options = Settings().get('options')
+        enable_add_template_to_empty_file = (options[
+                        'enable_add_template_to_empty_file'])
 
-        self.update_last_modified(view, 'by')
-        self.update_last_modified(view, 'time')
+        path = view.file_name()
+        condition = (path and enable_add_template_to_empty_file 
+                          and view.size() <= 0)
+
+        if exists:
+            condition = (condition and os.path.exists(path) 
+                         and os.path.isfile(path) 
+                         and os.path.getsize(path) <= 0)
+
+        if condition:    
+            block(view, view.run_command, 'add_file_header', {'path': path})
+            block(view, view.show, 0)
+
+
+    def on_new(self, view):
+        '''For ST2'''
+
+        FileHeaderListener.new_view_id.append(view.id())
+
+    def on_pre_save(self, view):
+        if view.id() in FileHeaderListener.new_view_id: 
+            self.insert_template(view, False)
+            index = FileHeaderListener.new_view_id.index(view.id())
+            del FileHeaderListener.new_view_id[index]
+        else:
+            self.update_last_modified(view, 'by')
+            self.update_last_modified(view, 'time')
+    
+    def on_activated(self, view):
+        self.insert_template(view, True)
+

@@ -9,6 +9,13 @@
         */
         "time_format": 0,
         /*
+        Whether add template to the empty file.
+
+        It's useful when you create new file through other command, for 
+        example, the default Sublime Text's **New File...** or other plugin.
+        */
+        "enable_add_template_to_empty_file": true,
+        /*
         Set your custom template header path here, it is a directory in which 
         you write your own header files. The file name should be a language, 
         "Python.tmpl" for example. 
