@@ -4,7 +4,7 @@
 # @Date:   2013-10-28 13:39:48
 # @Email:  shiyanhui66@gmail.com
 # @Last modified by:   lime
-# @Last Modified time: 2013-11-02 22:37:22
+# @Last Modified time: 2013-11-02 23:00:27
 
 import os
 import sys
@@ -70,6 +70,8 @@ def Window():
 
 def Settings():
     '''Get settings'''
+    settings = sublime.load_resource('Packages/FileHeader/%s.sublime-settings' 
+                                      % PLUGIN_NAME)
 
     return sublime.load_settings('%s.sublime-settings' % PLUGIN_NAME)
 
