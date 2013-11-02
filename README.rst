@@ -5,9 +5,9 @@ FileHeader
 Overview
 ========
 
-FileHeader is a file templating plugin for SublimeText 2 and SublimeText 3. It makes it easier to create new file with initial contents. It also can add new header to an existed file or directory.
+FileHeader is a powerful file templating plugin for SublimeText 2 and SublimeText 3. It makes it easier to create new file with initial contents. It also can add new header to an existed file or directory.
 
-:Info: FileHeader, a file templating plugin for ST2/ST3.
+:Info: FileHeader, a powerful file templating plugin for ST2/ST3.
 :Author: Lime YH.Shi
 
 Features
@@ -94,116 +94,134 @@ A very important feature of FileHeader is that it can automatically update **las
 Settings
 ========
 
-There are three kinds of arguments, **options**, **Default** and kinds of languages variables settings. **options** is the functional setting, **Default** is the default language variables settings. Language variables setting will cover that in **Default**.
+There are two kinds of arguments: **options** and kinds of languages variables settings. **options** is the functional setting, **Default** is the default language variables settings. Language variables setting will cover that in **Default**.
 
 .. code-block:: c++
     
     {
-        "options": {
-            /*
-            The datetime format.
+        /*
+        options
+        =======
+        */
 
-                0: "%Y-%m-%d %H:%M:%S"
-                1: "%Y-%m-%d"
-                2: "%H:%M:%S"
-            */
-            "time_format": 0,
-            /*
-            Set your custom template header path here, it is a directory in which 
-            you write your own header files. The file name should be a language, 
-            "Python.tmpl" for example. 
-            */
-            "custom_template_header_path": "",
-            /*
-            Set your custom template body path here, it is a directory in which 
-            you write your own body files. The file name should be a language, 
-            "Python.tmpl" for example. 
+        /*
+        The datetime format.
 
-            The tempalte structure is:
+            0: "%Y-%m-%d %H:%M:%S"
+            1: "%Y-%m-%d"
+            2: "%H:%M:%S"
+        */
+        "time_format": 0,
+        /*
+        Whether add template to the empty file.
 
-                I am a template
-                ---------------
-                header
-                body
+        It's useful when you create new file through other command, for 
+        example, the default Sublime Text's **New File...** or other plugin.
+        */
+        "enable_add_template_to_empty_file": true,
+        /*
+        Set your custom template header path here, it is a directory in which 
+        you write your own header files. The file name should be a language, 
+        "Python.tmpl" for example. 
+        */
+        "custom_template_header_path": "",
+        /*
+        Set your custom template body path here, it is a directory in which 
+        you write your own body files. The file name should be a language, 
+        "Python.tmpl" for example. 
 
-            */
-            "custom_template_body_path": "",
-            /*
-            Whether show input panel when you add header. The default file which 
-            you add header to is the current file you edit.
-            */
-            "show_input_panel_when_add_header": true,
-            /*
-            Whether open file when you add header to files in the specified 
-            directory.
-            */
-            "open_file_when_add_header_to_directory": true,
-            /*
-            Whether enable add header to hidden directory. If false, FileHeader 
-            won't add header to files under it. 
-            */
-            "enable_add_header_to_hidden_dir": false,
-            /*
-            Whether enable add header to hidden file. If false, FileHeader 
-            won't add header to it. 
-            */
-            "enable_add_header_to_hidden_file": false,
-            /*
-            FileHeader judges programming language according file suffix.
+        The tempalte structure is:
 
-            Default programming language if FileHeader judges failed when you
-            create new file.
-            */
-            "syntax_when_not_match": "Text",
-            /*
-            FileHeader will judge programming language according to file suffix.
-            You can add more file suffix here. Note: language should be one of 
-            that under **Default**. If FileHeader don't find the suffix,
-            FileHeader will set language as **syntax_when_not_match** above.
-            */
-            "file_suffix_mapping":{
-                "as": "ActionScript",
-                "scpt": "AppleScript",
-                "asp": "ASP",
-                "aspx": "ASP",
-                "bat": "Batch File",
-                "c": "C",
-                "cs": "C#",
-                "cpp": "C++",
-                "clj": "Clojure",
-                "css": "CSS",
-                "D": "D",
-                "erl": "Erlang",
-                "go": "Go",
-                "groovy": "Groovy",
-                "hs": "Haskell",
-                "htm": "HTML",
-                "html": "HTML",
-                "java": "Java",
-                "js": "JavaScript",
-                "tex": "LaTeX",
-                "lsp": "Lisp",
-                "lua": "Lua",
-                "md": "Markdown",
-                "mat": "Matlab",
-                "m": "Objective-C",
-                "ml": "OCaml",
-                "p": "Pascal",
-                "pl": "Perl",
-                "php": "PHP",
-                "py": "Python",
-                "R": "R",
-                "rst": "RestructuredText",
-                "rb": "Ruby",
-                "scala": "Scala",
-                "sh": "ShellScript",
-                "sql": "SQL",
-                "tcl": "TCL",
-                "txt": "Text",
-                "xml": "XML"
-            }
-        } ,
-        // The default variables you render.
+            I am a file
+            -----------
+            header
+            body
+
+        */
+        "custom_template_body_path": "",
+        /*
+        Whether show input panel when you add header. The default file which 
+        you add header to is the current file you edit.
+        */
+        "show_input_panel_when_add_header": true,
+        /*
+        Whether open file when you add header to files in the specified 
+        directory.
+        */
+        "open_file_when_add_header_to_directory": true,
+        /*
+        Whether enable add header to hidden directory. If false, FileHeader 
+        won't add header to files under it. 
+        */
+        "enable_add_header_to_hidden_dir": false,
+        /*
+        Whether enable add header to hidden file. If false, FileHeader 
+        won't add header to it. 
+        */
+        "enable_add_header_to_hidden_file": false,
+        /*
+        FileHeader judges programming language according file suffix.
+
+        Default programming language if FileHeader judges failed when you
+        create new file.
+        */
+        "syntax_when_not_match": "Text",
+        /*
+        FileHeader will judge programming language according to file suffix.
+        You can add more file suffix here. Note: language should be one of 
+        that under **Default**. If FileHeader don't find the suffix,
+        FileHeader will set language as **syntax_when_not_match** above.
+        */
+        "file_suffix_mapping":{
+            "as": "ActionScript",
+            "scpt": "AppleScript",
+            "asp": "ASP",
+            "aspx": "ASP",
+            "bat": "Batch File",
+            "c": "C",
+            "cs": "C#",
+            "cpp": "C++",
+            "clj": "Clojure",
+            "css": "CSS",
+            "D": "D",
+            "erl": "Erlang",
+            "go": "Go",
+            "groovy": "Groovy",
+            "hs": "Haskell",
+            "htm": "HTML",
+            "html": "HTML",
+            "java": "Java",
+            "js": "JavaScript",
+            "tex": "LaTeX",
+            "lsp": "Lisp",
+            "lua": "Lua",
+            "md": "Markdown",
+            "mat": "Matlab",
+            "m": "Objective-C",
+            "ml": "OCaml",
+            "p": "Pascal",
+            "pl": "Perl",
+            "php": "PHP",
+            "py": "Python",
+            "R": "R",
+            "rst": "RestructuredText",
+            "rb": "Ruby",
+            "scala": "Scala",
+            "sh": "ShellScript",
+            "sql": "SQL",
+            "tcl": "TCL",
+            "txt": "Text",
+            "xml": "XML"
+        },
+
+        /*
+        variables
+        =========
+        */
+        
+        /*
+        Below is the variables you render templater.
+        */
         "Default": {
             /*
             Builtin Variables
