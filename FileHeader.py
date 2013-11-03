@@ -4,7 +4,7 @@
 # @Date:   2013-10-28 13:39:48
 # @Email:  shiyanhui66@gmail.com
 # @Last modified by:   lime
-# @Last Modified time: 2013-11-03 12:05:14
+# @Last Modified time: 2013-11-03 12:08:08
 
 import os
 import sys
@@ -530,7 +530,7 @@ class FileHeaderListener(sublime_plugin.EventListener):
 
             new_buffer.append(line)
 
-        return '\n'.join(new_buffer)
+        return '\n'.join(new_buffer), by_found or time_found
 
     def insert_template(self, view, exists):
         enable_add_template_to_empty_file = Settings().get(
@@ -560,10 +560,11 @@ class FileHeaderListener(sublime_plugin.EventListener):
             index = FileHeaderListener.new_view_id.index(view.id())
             del FileHeaderListener.new_view_id[index]
         else:
-            new_buffer = self.get_new_buffer(view)
-            view.run_command('file_header_replace',
-                             {'a': 0, 'b': view.size(),
-                             'strings': new_buffer})
+            new_buffer, found = self.get_new_buffer(view)
+            if found:
+                view.run_command('file_header_replace',
+                                 {'a': 0, 'b': view.size(),
+                                 'strings': new_buffer})
 
     def on_activated(self, view):
         self.insert_template(view, True)
