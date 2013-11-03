@@ -4,7 +4,7 @@
 # @Date:   2013-10-28 13:39:48
 # @Email:  shiyanhui66@gmail.com
 # @Last modified by:   lime
-# @Last Modified time: 2013-11-03 00:23:31
+# @Last Modified time: 2013-11-03 12:00:58
 
 import os
 import sys
@@ -32,7 +32,6 @@ BODY_PATH = os.path.join(PLUGIN_PATH, 'template/body')
 INSTALLED_PLGIN_PATH = os.path.abspath(os.path.dirname(__file__))
 
 sys.path.insert(0, PLUGIN_PATH)
-
 
 def plugin_loaded():
     '''ST3'''
@@ -150,6 +149,7 @@ def get_args(syntax_type):
     if 'last_modified_by' not in args:
         args.update({'last_modified_by': user})
 
+    print(args)
     return args
 
 
@@ -462,13 +462,11 @@ class FileHeaderListener(sublime_plugin.EventListener):
              '\d{4}-\d{2}-\d{2}', '\d{2}:\d{2}:\d{2}']
         return _[choice]
 
-    def update_last_modified(self, view, what):
-        what = what.upper()
-        syntax_type = get_syntax_type(view.file_name())
-        template = get_template_part(syntax_type, 'header')
-        lines = template.split('\n')
-
+    def get_line_pattern(self, view, lines, what):
         line_pattern = None
+        line_header  = None
+
+        what = what.upper()
         for line in lines:
             regex = getattr(FileHeaderListener, 'MODIFIED_%s_REGEX' % what)
             search = regex.search(line)
@@ -485,28 +483,53 @@ class FileHeaderListener(sublime_plugin.EventListener):
 
                 line_header = line_header.replace('*', '\*')
                 if what == 'BY':
-                    line_pattern = '%s.*\n' % line_header
+                    line_pattern = '%s.*' % line_header
                 else:
-                    line_pattern = '%s\s*%s.*\n' % (line_header,
-                                                    self.time_pattern())
+                    line_pattern = '%s\s*%s.*' % (line_header,
+                                                  self.time_pattern())
+
+                line_header = line_header + (index - space_start) * ' '
                 break
 
-        if line_pattern is not None:
-            _ = view.find(line_pattern, 0)
-            if(_ != sublime.Region(-1, -1) and _ is not None):
-                a = _.a + space_start
-                b = _.b - 1
+        return line_pattern, line_header
 
-                spaces = (index - space_start) * ' '
-                if what == 'BY':
+    def get_new_buffer(self, view):
+        syntax_type = get_syntax_type(view.file_name())
+        template = get_template_part(syntax_type, 'header')
+        lines = template.split('\n')
+
+        by_pattern, by_header = self.get_line_pattern(view, lines, 'by')
+        time_pattern, time_header = self.get_line_pattern(view, lines, 'time')
+
+        if by_pattern is not None:
+            by_pattern = re.compile(by_pattern)
+        if time_pattern is not None:
+            time_pattern = re.compile(time_pattern)
+
+        new_buffer = []
+        by_found = False
+        time_found = False
+
+        lines = view.substr(sublime.Region(0, view.size())).split('\n')
+        for line in lines:
+            if by_pattern is not None and not by_found:
+                by_match = by_pattern.match(line)
+                if by_match is not None:
                     args = get_args(syntax_type)
-                    strings = (spaces + args['last_modified_by'])
-                else:
+                    line = by_header + args['last_modified_by']
+                    by_found = True
+
+            if time_pattern is not None and not time_found:
+                time_match = time_pattern.match(line)
+                if time_match is not None:
                     strftime = get_strftime()
                     time = datetime.now().strftime(strftime)
-                    strings = (spaces + time)
-                view.run_command('file_header_replace',
-                                 {'a': a, 'b': b, 'strings': strings})
+                    line = time_header + time
+                    time_found = True
+            
+            new_buffer.append(line)
+
+        return '\n'.join(new_buffer)
 
     def insert_template(self, view, exists):
         enable_add_template_to_empty_file = Settings().get(
@@ -536,8 +559,10 @@ class FileHeaderListener(sublime_plugin.EventListener):
             index = FileHeaderListener.new_view_id.index(view.id())
             del FileHeaderListener.new_view_id[index]
         else:
-            self.update_last_modified(view, 'by')
-            self.update_last_modified(view, 'time')
+            new_buffer = self.get_new_buffer(view)
+            view.run_command('file_header_replace', 
+                             {'a': 0, 'b': view.size(), 
+                             'strings': new_buffer})
 
     def on_activated(self, view):
         self.insert_template(view, True)
