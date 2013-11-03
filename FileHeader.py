@@ -4,7 +4,7 @@
 # @Date:   2013-10-28 13:39:48
 # @Email:  shiyanhui66@gmail.com
 # @Last modified by:   lime
-# @Last Modified time: 2013-11-03 12:00:58
+# @Last Modified time: 2013-11-03 12:05:14
 
 import os
 import sys
@@ -32,6 +32,7 @@ BODY_PATH = os.path.join(PLUGIN_PATH, 'template/body')
 INSTALLED_PLGIN_PATH = os.path.abspath(os.path.dirname(__file__))
 
 sys.path.insert(0, PLUGIN_PATH)
+
 
 def plugin_loaded():
     '''ST3'''
@@ -62,6 +63,7 @@ def plugin_loaded():
         for f in z.namelist():
             z.extract(f, PLUGIN_PATH)
         z.close()
+
 
 def Window():
     '''Get current act``ive window'''
@@ -149,7 +151,6 @@ def get_args(syntax_type):
     if 'last_modified_by' not in args:
         args.update({'last_modified_by': user})
 
-    print(args)
     return args
 
 
@@ -464,7 +465,7 @@ class FileHeaderListener(sublime_plugin.EventListener):
 
     def get_line_pattern(self, view, lines, what):
         line_pattern = None
-        line_header  = None
+        line_header = None
 
         what = what.upper()
         for line in lines:
@@ -526,7 +527,7 @@ class FileHeaderListener(sublime_plugin.EventListener):
                     time = datetime.now().strftime(strftime)
                     line = time_header + time
                     time_found = True
-            
+
             new_buffer.append(line)
 
         return '\n'.join(new_buffer)
@@ -560,8 +561,8 @@ class FileHeaderListener(sublime_plugin.EventListener):
             del FileHeaderListener.new_view_id[index]
         else:
             new_buffer = self.get_new_buffer(view)
-            view.run_command('file_header_replace', 
-                             {'a': 0, 'b': view.size(), 
+            view.run_command('file_header_replace',
+                             {'a': 0, 'b': view.size(),
                              'strings': new_buffer})
 
     def on_activated(self, view):
