@@ -4,7 +4,8 @@
 # @Date:   2013-10-28 13:39:48
 # @Email:  shiyanhui66@gmail.com
 # @Last modified by:   lime
-# @Last Modified time: 2013-11-03 14:26:11
+# @Last Modified time: 2013-11-03 21:47:27
+
 
 import os
 import sys
@@ -42,24 +43,26 @@ def plugin_loaded():
     global PLUGIN_PATH
     global HEADER_PATH
     global BODY_PATH
+    global INSTALLED_PLGIN_PATH
 
     PACKAGES_PATH = sublime.packages_path()
     PLUGIN_PATH = os.path.join(PACKAGES_PATH, PLUGIN_NAME)
     HEADER_PATH = os.path.join(PLUGIN_PATH, 'template/header')
     BODY_PATH = os.path.join(PLUGIN_PATH, 'template/body')
+    INSTALLED_PLGIN_PATH = os.path.abspath(os.path.dirname(__file__))
 
     sys.path.insert(0, PLUGIN_PATH)
 
-    if os.path.exists(PLUGIN_PATH):
-        try:
-            shutil.rmtree(PLUGIN_PATH)
-        except:
-            pass
+    if INSTALLED_PLGIN_PATH != PLUGIN_PATH:
+        if os.path.exists(PLUGIN_PATH):
+            try:
+                shutil.rmtree(PLUGIN_PATH)
+            except:
+                pass
+    
+        if not os.path.exists(PLUGIN_PATH):
+            os.mkdir(PLUGIN_PATH)
 
-    if not os.path.exists(PLUGIN_PATH):
-        os.mkdir(PLUGIN_PATH)
-
-    if os.path.exists(INSTALLED_PLGIN_PATH):
         z = zipfile.ZipFile(INSTALLED_PLGIN_PATH, 'r')
         for f in z.namelist():
             z.extract(f, PLUGIN_PATH)
@@ -75,9 +78,7 @@ def Window():
 def Settings():
     '''Get settings'''
 
-    setting_name = '%s.sublime-settings' % PLUGIN_NAME
-    settings = sublime.load_settings(setting_name)
-    return settings
+    return sublime.load_settings('%s.sublime-settings' % PLUGIN_NAME)
 
 
 def get_template_part(syntax_type, part):
@@ -220,7 +221,6 @@ def block(view, callback, *args, **kwargs):
 
 
 class FileHeaderNewFileCommand(sublime_plugin.WindowCommand):
-
     '''Create a new file with header'''
 
     def new_file(self, path, syntax_type):
@@ -267,6 +267,7 @@ class FileHeaderNewFileCommand(sublime_plugin.WindowCommand):
 
         return path
 
+
     def on_done(self, path, name):
         if not name:
             return
@@ -278,6 +279,7 @@ class FileHeaderNewFileCommand(sublime_plugin.WindowCommand):
         else:
             path = os.path.join(path, name)
             self.new_file(path, syntax_type)
+
 
     def run(self, paths=[]):
         path = self.get_path(paths)
@@ -292,7 +294,6 @@ class FileHeaderNewFileCommand(sublime_plugin.WindowCommand):
 
 
 class BackgroundAddHeaderThread(threading.Thread):
-
     '''Add header in background.'''
 
     def __init__(self, path):
@@ -316,7 +317,6 @@ class BackgroundAddHeaderThread(threading.Thread):
 
 
 class AddFileHeaderCommand(sublime_plugin.TextCommand):
-
     '''Command: add `header` in a file'''
 
     def run(self, edit, path, part=None):
@@ -326,7 +326,6 @@ class AddFileHeaderCommand(sublime_plugin.TextCommand):
 
 
 class FileHeaderAddHeaderCommand(sublime_plugin.WindowCommand):
-
     '''Conmmand: add `header` in a file or directory'''
 
     def is_hidden(self, path):
@@ -352,8 +351,8 @@ class FileHeaderAddHeaderCommand(sublime_plugin.WindowCommand):
         '''Whether can add header to path'''
 
         def can_add_to_dir(path):
-            return enable_add_to_hidden_dir or (not enable_add_to_hidden_dir and
-                                                not self.is_hidden(path))
+            return enable_add_to_hidden_dir or (not enable_add_to_hidden_dir 
+                                                and not self.is_hidden(path))
 
         if not os.path.exists(path):
             return False
@@ -375,6 +374,7 @@ class FileHeaderAddHeaderCommand(sublime_plugin.WindowCommand):
 
         return False
 
+
     def add(self, path):
         '''Add to a file'''
 
@@ -390,6 +390,7 @@ class FileHeaderAddHeaderCommand(sublime_plugin.WindowCommand):
             thread = BackgroundAddHeaderThread(path)
             thread.start()
 
+
     def walk(self, path):
         '''Add files in the path'''
 
@@ -398,6 +399,7 @@ class FileHeaderAddHeaderCommand(sublime_plugin.WindowCommand):
                 file_name = os.path.join(root, f)
                 if self.can_add(file_name):
                     self.add(file_name)
+
 
     def on_done(self, path):
         if not path:
@@ -413,6 +415,7 @@ class FileHeaderAddHeaderCommand(sublime_plugin.WindowCommand):
 
         elif os.path.isdir(path) and self.can_add(path):
             self.walk(path)
+
 
     def run(self, paths=[]):
         initial_text = ''
@@ -453,7 +456,6 @@ class FileHeaderMultiUndoCommand(sublime_plugin.TextCommand):
 
 
 class FileHeaderListener(sublime_plugin.EventListener):
-
     '''Auto update `last_modified_time` when save file'''
 
     MODIFIED_TIME_REGEX = re.compile('\{\{\s*last_modified_time\s*\}\}')
@@ -504,6 +506,7 @@ class FileHeaderListener(sublime_plugin.EventListener):
 
         return line_pattern, line_header
 
+
     def get_new_buffer(self, view):
         syntax_type = get_syntax_type(view.file_name())
         template = get_template_part(syntax_type, 'header')
@@ -542,6 +545,7 @@ class FileHeaderListener(sublime_plugin.EventListener):
 
         return '\n'.join(new_buffer), by_found or time_found
 
+
     def insert_template(self, view, exists):
         enable_add_template_to_empty_file = Settings().get(
             'enable_add_template_to_empty_file')
@@ -559,10 +563,12 @@ class FileHeaderListener(sublime_plugin.EventListener):
             block(view, view.run_command, 'add_file_header', {'path': path})
             block(view, view.show, 0)
 
+
     def on_new(self, view):
         '''For ST2'''
 
         FileHeaderListener.new_view_id.append(view.id())
+
 
     def on_text_command(self, view, command_name, args):
         pass
@@ -580,6 +586,7 @@ class FileHeaderListener(sublime_plugin.EventListener):
                     view.run_command('file_header_replace',
                                      {'a': 0, 'b': view.size(),
                                      'strings': new_buffer})
+
 
     def on_activated(self, view):
         self.insert_template(view, True)
