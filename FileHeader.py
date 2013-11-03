@@ -95,7 +95,7 @@ def get_template_part(syntax_type, part):
 
     try:
         template_file = open(tmpl_file, 'r')
-        contents = template_file.read() + '\n'
+        contents = template_file.read()
         template_file.close()
     except Exception as e:
         sublime.error_message(str(e))
