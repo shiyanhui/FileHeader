@@ -4,7 +4,7 @@
 # @Date:   2013-10-28 13:39:48
 # @Email:  shiyanhui66@gmail.com
 # @Last modified by:   lime
-# @Last Modified time: 2013-11-03 12:08:08
+# @Last Modified time: 2013-11-03 14:26:11
 
 import os
 import sys
@@ -23,6 +23,7 @@ if sys.version < '3':
     import commands as process
 else:
     import subprocess as process
+
 
 PLUGIN_NAME = 'FileHeader'
 PACKAGES_PATH = sublime.packages_path()
@@ -436,12 +437,19 @@ class FileHeaderAddHeaderCommand(sublime_plugin.WindowCommand):
 
 
 class FileHeaderReplaceCommand(sublime_plugin.TextCommand):
-
     '''Replace contents in the `region` with `stirng`'''
 
     def run(self, edit, a, b, strings):
         region = sublime.Region(int(a), int(b))
         self.view.replace(edit, region, strings)
+
+
+class FileHeaderMultiUndoCommand(sublime_plugin.TextCommand):
+    '''Repeat Undo'''
+
+    def run(self, edit, times):
+        for i in range(times):
+            self.view.run_command('undo')
 
 
 class FileHeaderListener(sublime_plugin.EventListener):
@@ -482,6 +490,8 @@ class FileHeaderListener(sublime_plugin.EventListener):
                         line_header = line[: space_start]
                         break
 
+                origin_line_header = line_header
+
                 line_header = line_header.replace('*', '\*')
                 if what == 'BY':
                     line_pattern = '%s.*' % line_header
@@ -489,7 +499,7 @@ class FileHeaderListener(sublime_plugin.EventListener):
                     line_pattern = '%s\s*%s.*' % (line_header,
                                                   self.time_pattern())
 
-                line_header = line_header + (index - space_start) * ' '
+                line_header = origin_line_header + (index - space_start) * ' '
                 break
 
         return line_pattern, line_header
@@ -554,17 +564,22 @@ class FileHeaderListener(sublime_plugin.EventListener):
 
         FileHeaderListener.new_view_id.append(view.id())
 
+    def on_text_command(self, view, command_name, args):
+        pass
+
+
     def on_pre_save(self, view):
         if view.id() in FileHeaderListener.new_view_id:
             self.insert_template(view, False)
             index = FileHeaderListener.new_view_id.index(view.id())
             del FileHeaderListener.new_view_id[index]
         else:
-            new_buffer, found = self.get_new_buffer(view)
-            if found:
-                view.run_command('file_header_replace',
-                                 {'a': 0, 'b': view.size(),
-                                 'strings': new_buffer})
+            if view.is_dirty():
+                new_buffer, found = self.get_new_buffer(view)
+                if found:
+                    view.run_command('file_header_replace',
+                                     {'a': 0, 'b': view.size(),
+                                     'strings': new_buffer})
 
     def on_activated(self, view):
         self.insert_template(view, True)
