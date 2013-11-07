@@ -2,9 +2,8 @@
 # -*- coding: utf-8 -*-
 # @Author: lime
 # @Date:   2013-10-28 13:39:48
-# @Email:  shiyanhui66@gmail.com
 # @Last modified by:   lime
-# @Last Modified time: 2013-11-03 21:47:27
+# @Last Modified time: 2013-11-07 09:27:34
 
 
 import os
@@ -447,14 +446,6 @@ class FileHeaderReplaceCommand(sublime_plugin.TextCommand):
         self.view.replace(edit, region, strings)
 
 
-class FileHeaderMultiUndoCommand(sublime_plugin.TextCommand):
-    '''Repeat Undo'''
-
-    def run(self, edit, times):
-        for i in range(times):
-            self.view.run_command('undo')
-
-
 class FileHeaderListener(sublime_plugin.EventListener):
     '''Auto update `last_modified_time` when save file'''
 
@@ -494,7 +485,7 @@ class FileHeaderListener(sublime_plugin.EventListener):
 
                 origin_line_header = line_header
 
-                line_header = line_header.replace('*', '\*')
+                line_header = re.escape(line_header)
                 if what == 'BY':
                     line_pattern = '%s.*' % line_header
                 else:
@@ -571,7 +562,9 @@ class FileHeaderListener(sublime_plugin.EventListener):
 
 
     def on_text_command(self, view, command_name, args):
-        pass
+        if command_name == 'undo':
+            while view.command_history(0)[0] == 'file_header_replace':
+                view.run_command('undo')
 
 
     def on_pre_save(self, view):
