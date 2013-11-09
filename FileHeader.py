@@ -3,7 +3,8 @@
 # @Author: lime
 # @Date:   2013-10-28 13:39:48
 # @Last Modified by:   lime
-# @Last Modified time: 2013-11-08 20:42:07
+# @Last Modified time: 2013-11-09 08:00:00
+
 
 import os
 import sys
@@ -528,8 +529,6 @@ class FileHeaderListener(sublime_plugin.EventListener):
             block(view, view.show, 0)
 
     def on_new(self, view):
-        '''For ST2'''
-
         FileHeaderListener.new_view_id.append(view.id())
 
     def on_text_command(self, view, command_name, args):
