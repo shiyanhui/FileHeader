@@ -3,8 +3,7 @@
 # @Author: lime
 # @Date:   2013-10-28 13:39:48
 # @Last Modified by:   lime
-# @Last Modified time: 2013-11-09 08:00:00
-
+# @Last Modified time: 2013-11-11 10:35:19
 
 import os
 import sys
@@ -16,7 +15,7 @@ import threading
 import zipfile
 import getpass
 import shutil
-
+import time
 
 from datetime import datetime
 
@@ -70,7 +69,7 @@ def plugin_loaded():
 
 
 def Window():
-    '''Get current act``ive window'''
+    '''Get current active window'''
 
     return sublime.active_window()
 
@@ -133,17 +132,30 @@ def get_user():
     return user
 
 
-def get_args(syntax_type):
-    '''Get the args rendered'''
+def get_args(syntax_type, path=None):
+    '''Get the args rendered.
+
+    :Para:
+        - `syntax_type`: Language type
+        - `which`: candidates are 'new' and 'add'
+    '''
 
     args = Settings().get('Default')
     args.update(Settings().get(syntax_type, {}))
 
-    format = get_strftime()
-    time = datetime.now().strftime(format)
+    c_time = m_time = datetime.now()
+    if path is not None:
+        try:
+            stat = os.stat(path)
+        except:
+            pass
+        else:
+            c_time = datetime(*time.localtime(stat.st_ctime)[:6])
+            m_time = datetime(*time.localtime(stat.st_mtime)[:6])
 
-    args.update({'create_time': time})
-    args.update({'last_modified_time': time})
+    format = get_strftime()
+    args.update({'create_time': c_time.strftime(format)})
+    args.update({'last_modified_time': m_time.strftime(format)})
 
     user = get_user()
 
@@ -156,7 +168,7 @@ def get_args(syntax_type):
     return args
 
 
-def render_template(syntax_type, part=None):
+def render_template(syntax_type, part=None, path=None):
     '''Render the template correspond `syntax_type`'''
 
     from jinja2 import Template
@@ -166,7 +178,7 @@ def render_template(syntax_type, part=None):
         else:
             template = Template(get_template(syntax_type))
 
-        render_string = template.render(get_args(syntax_type))
+        render_string = template.render(get_args(syntax_type, path))
     except Exception as e:
         sublime.error_message(str(e))
         render_string = ''
@@ -267,7 +279,6 @@ class FileHeaderNewFileCommand(sublime_plugin.WindowCommand):
 
         return path
 
-
     def on_done(self, path, name):
         if not name:
             return
@@ -279,7 +290,6 @@ class FileHeaderNewFileCommand(sublime_plugin.WindowCommand):
         else:
             path = os.path.join(path, name)
             self.new_file(path, syntax_type)
-
 
     def run(self, paths=[]):
         path = self.get_path(paths)
@@ -302,7 +312,7 @@ class BackgroundAddHeaderThread(threading.Thread):
 
     def run(self):
         syntax_type = get_syntax_type(self.path)
-        header = render_template(syntax_type, 'header')
+        header = render_template(syntax_type, 'header', self.path)
 
         try:
             with open(self.path, 'r') as f:
@@ -321,7 +331,7 @@ class AddFileHeaderCommand(sublime_plugin.TextCommand):
 
     def run(self, edit, path, part=None):
         syntax_type = get_syntax_type(path)
-        header = render_template(syntax_type, part)
+        header = render_template(syntax_type, part, path)
         self.view.insert(edit, 0, header)
 
 
@@ -374,7 +384,6 @@ class FileHeaderAddHeaderCommand(sublime_plugin.WindowCommand):
 
         return False
 
-
     def add(self, path):
         '''Add to a file'''
 
@@ -390,7 +399,6 @@ class FileHeaderAddHeaderCommand(sublime_plugin.WindowCommand):
             thread = BackgroundAddHeaderThread(path)
             thread.start()
 
-
     def walk(self, path):
         '''Add files in the path'''
 
@@ -399,7 +407,6 @@ class FileHeaderAddHeaderCommand(sublime_plugin.WindowCommand):
                 file_name = os.path.join(root, f)
                 if self.can_add(file_name):
                     self.add(file_name)
-
 
     def on_done(self, path):
         if not path:
@@ -415,7 +422,6 @@ class FileHeaderAddHeaderCommand(sublime_plugin.WindowCommand):
 
         elif os.path.isdir(path) and self.can_add(path):
             self.walk(path)
-
 
     def run(self, paths=[]):
         initial_text = ''
@@ -503,7 +509,7 @@ class FileHeaderListener(sublime_plugin.EventListener):
                 spaces = (index - space_start) * ' '
                 if what == 'BY':
                     args = get_args(syntax_type)
-                    strings = (spaces+ args['last_modified_by'])
+                    strings = (spaces + args['last_modified_by'])
                 else:                    
                     strftime = get_strftime()
                     time = datetime.now().strftime(strftime)

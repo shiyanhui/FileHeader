@@ -54,7 +54,7 @@ Usage
 Create a new file
 -----------------
 
-- Sidebar menu
+- Sidebar Menu
 
     .. image:: https://raw.github.com/shiyanhui/shiyanhui.github.io/master/images/FileHeader/new-file.gif
 
@@ -62,14 +62,14 @@ Create a new file
 
     The default shortcuts is **super+alt+n** on OS X, **ctrl+alt+n** on Windows and Linux.
 
-- Context menu
+- Context Menu
 
-    Similar to **Sidebar menu**.
+    Similar to **Sidebar Menu**.
 
 Add header to an existed file
 -----------------------------
 
-- Sidebar menu
+- Sidebar Menu
 
     .. image:: https://raw.github.com/shiyanhui/shiyanhui.github.io/master/images/FileHeader/add-header.gif
 
@@ -77,9 +77,9 @@ Add header to an existed file
 
     The default shortcuts is **super+alt+a** on OS X, **ctrl+alt+a** on Windows and Linux.
 
-- Context menu
+- Context Menu
 
-    Similar to **Sidebar menu**.
+    Similar to **Sidebar Menu**.
     
 Add header to files in the specified directory
 ----------------------------------------------
