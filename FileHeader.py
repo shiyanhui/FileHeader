@@ -3,7 +3,7 @@
 # @Author: lime
 # @Date:   2013-10-28 13:39:48
 # @Last Modified by:   lime
-# @Last Modified time: 2013-11-11 10:35:19
+# @Last Modified time: 2013-11-13 16:29:34
 
 import os
 import sys
@@ -16,6 +16,7 @@ import zipfile
 import getpass
 import shutil
 import time
+import pickle
 
 from datetime import datetime
 
@@ -32,6 +33,8 @@ HEADER_PATH = os.path.join(PLUGIN_PATH, 'template/header')
 BODY_PATH = os.path.join(PLUGIN_PATH, 'template/body')
 INSTALLED_PLGIN_PATH = os.path.abspath(os.path.dirname(__file__))
 
+IS_ST3 = sublime.version() >= '3'
+
 sys.path.insert(0, PLUGIN_PATH)
 
 
@@ -43,12 +46,15 @@ def plugin_loaded():
     global HEADER_PATH
     global BODY_PATH
     global INSTALLED_PLGIN_PATH
+    global IS_ST3
 
     PACKAGES_PATH = sublime.packages_path()
     PLUGIN_PATH = os.path.join(PACKAGES_PATH, PLUGIN_NAME)
     HEADER_PATH = os.path.join(PLUGIN_PATH, 'template/header')
     BODY_PATH = os.path.join(PLUGIN_PATH, 'template/body')
     INSTALLED_PLGIN_PATH = os.path.abspath(os.path.dirname(__file__))
+
+    IS_ST3 = sublime.version() >= '3'
 
     sys.path.insert(0, PLUGIN_PATH)
 
@@ -132,7 +138,20 @@ def get_user():
     return user
 
 
-def get_args(syntax_type, path=None):
+def get_time(path):
+    c_time = m_time = None
+    try:
+        stat = os.stat(path)
+    except:
+        pass
+    else:
+        c_time = datetime(*time.localtime(stat.st_ctime)[:6])
+        m_time = datetime(*time.localtime(stat.st_mtime)[:6])
+
+    return c_time, m_time
+
+
+def get_args(syntax_type, options={}):
     '''Get the args rendered.
 
     :Para:
@@ -140,35 +159,45 @@ def get_args(syntax_type, path=None):
         - `which`: candidates are 'new' and 'add'
     '''
 
+    def get_st3_time():
+        _ = c_time = m_time = datetime.now()
+
+        path = options.get('path', None)
+        if path is not None:
+            c_time, m_time = get_time(path)
+
+            if c_time is None:
+                c_time = m_time = _
+
+        return c_time, m_time
+
+    def get_st2_time():
+        c_time, m_time = get_st3_time()
+        _ = options.get('c_time', None)
+        if _ is not None:
+            c_time = _
+
+        return c_time, m_time
+
+
     args = Settings().get('Default')
     args.update(Settings().get(syntax_type, {}))
 
-    c_time = m_time = datetime.now()
-    if path is not None:
-        try:
-            stat = os.stat(path)
-        except:
-            pass
-        else:
-            c_time = datetime(*time.localtime(stat.st_ctime)[:6])
-            m_time = datetime(*time.localtime(stat.st_mtime)[:6])
-
     format = get_strftime()
+    c_time, m_time = get_st3_time() if IS_ST3 else get_st2_time()
     args.update({'create_time': c_time.strftime(format)})
     args.update({'last_modified_time': m_time.strftime(format)})
 
     user = get_user()
-
     if 'author' not in args:
         args.update({'author': user})
-
     if 'last_modified_by' not in args:
         args.update({'last_modified_by': user})
 
     return args
 
 
-def render_template(syntax_type, part=None, path=None):
+def render_template(syntax_type, part=None, options={}):
     '''Render the template correspond `syntax_type`'''
 
     from jinja2 import Template
@@ -178,7 +207,7 @@ def render_template(syntax_type, part=None, path=None):
         else:
             template = Template(get_template(syntax_type))
 
-        render_string = template.render(get_args(syntax_type, path))
+        render_string = template.render(get_args(syntax_type, options))
     except Exception as e:
         sublime.error_message(str(e))
         render_string = ''
@@ -294,12 +323,8 @@ class FileHeaderNewFileCommand(sublime_plugin.WindowCommand):
     def run(self, paths=[]):
         path = self.get_path(paths)
 
-        caption = 'File Name:'
-        # if caption is not None:
-        #     caption = 'File Nanme: (Saved in %s)' % path
-
         Window().run_command('hide_panel')
-        Window().show_input_panel(caption, '', functools.partial(
+        Window().show_input_panel('File Name:', '', functools.partial(
                                   self.on_done, path), None, None)
 
 
@@ -312,16 +337,15 @@ class BackgroundAddHeaderThread(threading.Thread):
 
     def run(self):
         syntax_type = get_syntax_type(self.path)
-        header = render_template(syntax_type, 'header', self.path)
+        header = render_template(syntax_type, 'header', {'path': path})
 
         try:
             with open(self.path, 'r') as f:
                 contents = header + f.read()
-                f.close()
 
             with open(self.path, 'w') as f:
                 f.write(contents)
-                f.close()
+
         except Exception as e:
             sublime.error_message(str(e))
 
@@ -331,7 +355,15 @@ class AddFileHeaderCommand(sublime_plugin.TextCommand):
 
     def run(self, edit, path, part=None):
         syntax_type = get_syntax_type(path)
-        header = render_template(syntax_type, part, path)
+
+        options = {'path': path}
+        if not IS_ST3:
+            c_time = self.view.settings().get('c_time', None)
+            if c_time is not None:
+                c_time = pickle.loads(str(c_time))
+                options.update({'c_time': c_time})
+
+        header = render_template(syntax_type, part, options)
         self.view.insert(edit, 0, header)
 
 
@@ -454,7 +486,6 @@ class FileHeaderReplaceCommand(sublime_plugin.TextCommand):
 
 
 class FileHeaderListener(sublime_plugin.EventListener):
-    '''Auto update `last_modified_time` when save file'''
 
     MODIFIED_TIME_REGEX = re.compile('\{\{\s*last_modified_time\s*\}\}')
     MODIFIED_BY_REGEX = re.compile('\{\{\s*last_modified_by\s*\}\}')
@@ -474,6 +505,7 @@ class FileHeaderListener(sublime_plugin.EventListener):
     def update_last_modified(self, view, what):
         what = what.upper()
         syntax_type = get_syntax_type(view.file_name())
+
         template = get_template_part(syntax_type, 'header')    
         lines = template.split('\n')
 
@@ -553,4 +585,10 @@ class FileHeaderListener(sublime_plugin.EventListener):
                 self.update_last_modified(view, 'time')
 
     def on_activated(self, view):
+        settings = view.settings()
+
+        c_time, _ = get_time(view.file_name())
+        if c_time is not None and settings.get('c_time', None) is None:
+            settings.set('c_time', pickle.dumps(c_time))
+            
         self.insert_template(view, True)
