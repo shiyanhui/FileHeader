@@ -16,7 +16,7 @@ Features
 - Add new file with initial contents.
 - Auto detect **New File** action from SulimeText or other plugin.
 - Add header to an existed file or directory.
-- Batch add header to files in the specified dircetory.
+- Batch add header to files in the specified directory.
 - Auto update file last modified time and last modified by.
 - Auto detect file type.
 - Powerful template with Jinja2_.
