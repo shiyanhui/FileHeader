@@ -30,7 +30,7 @@
     you write your own body files. The file name should be a language, 
     "Python.tmpl" for example. 
 
-    The tempalte structure is:
+    The template structure is:
 
         I am a file
         -----------
@@ -115,7 +115,7 @@
     },
 
     /*
-    variables
+    Variables
     =========
     */
     
