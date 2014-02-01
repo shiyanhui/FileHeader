@@ -3,7 +3,7 @@
 # @Author: lime
 # @Date:   2013-10-28 13:39:48
 # @Last Modified by:   lime
-# @Last Modified time: 2013-11-22 11:19:13
+# @Last Modified time: 2014-02-01 20:53:14
 
 import os
 import sys
@@ -179,14 +179,21 @@ def get_args(syntax_type, options={}):
 
         return c_time, m_time
 
+    def get_file_name():
+        path = options.get('path', None)
+        return 'undefined' if path is None else os.path.basename(path)
 
     args = Settings().get('Default')
     args.update(Settings().get(syntax_type, {}))
 
     format = get_strftime()
     c_time, m_time = get_st3_time() if IS_ST3 else get_st2_time()
-    args.update({'create_time': c_time.strftime(format)})
-    args.update({'last_modified_time': m_time.strftime(format)})
+    
+    args.update({
+        'create_time': c_time.strftime(format),
+        'last_modified_time': m_time.strftime(format),
+        'file_name': get_file_name()
+    })
 
     user = get_user()
     if 'author' not in args:
@@ -216,6 +223,7 @@ def render_template(syntax_type, part=None, options={}):
 
 def get_syntax_type(name):
     '''Judge `syntax_type` according to to `name`'''
+    
     syntax_type = Settings().get('syntax_when_not_match')
     file_suffix_mapping = Settings().get('file_suffix_mapping')
 
@@ -487,8 +495,9 @@ class FileHeaderReplaceCommand(sublime_plugin.TextCommand):
 
 class FileHeaderListener(sublime_plugin.EventListener):
 
-    MODIFIED_TIME_REGEX = re.compile('\{\{\s*last_modified_time\s*\}\}')
-    MODIFIED_BY_REGEX = re.compile('\{\{\s*last_modified_by\s*\}\}')
+    LAST_MODIFIED_BY_REGEX = re.compile('\{\{\s*last_modified_by\s*\}\}')
+    LAST_MODIFIED_TIME_REGEX = re.compile('\{\{\s*last_modified_time\s*\}\}')
+    FILE_NAME_REGEX = re.compile('\{\{\s*file_name\s*\}\}')
 
     new_view_id = []
 
@@ -501,8 +510,8 @@ class FileHeaderListener(sublime_plugin.EventListener):
         _ = ['\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}',
              '\d{4}-\d{2}-\d{2}', '\d{2}:\d{2}:\d{2}']
         return _[choice]
-
-    def update_last_modified(self, view, what):
+    
+    def update_automatically(self, view, what):
         what = what.upper()
         syntax_type = get_syntax_type(view.file_name())
 
@@ -510,8 +519,8 @@ class FileHeaderListener(sublime_plugin.EventListener):
         lines = template.split('\n')
 
         line_pattern = None
+        regex = getattr(FileHeaderListener, '%s_REGEX' % what)
         for line in lines:
-            regex = getattr(FileHeaderListener, 'MODIFIED_%s_REGEX' % what)
             search = regex.search(line)
 
             if search is not None:
@@ -521,15 +530,17 @@ class FileHeaderListener(sublime_plugin.EventListener):
                 for i in range(index - 1, 0, -1):
                     if line[i] != ' ':
                         space_start = i + 1
-                        line_header = line[: space_start]
+                        line_header = line[:space_start]
                         break       
 
                 line_header = re.escape(line_header)
-                if what == 'BY':
+                if what == 'LAST_MODIFIED_BY' or what == 'FILE_NAME':
                     line_pattern = '%s.*\n' % line_header
+                elif what == 'LAST_MODIFIED_TIME':
+                    line_pattern = '%s\s*%s.*\n' % (line_header, self.time_pattern())
                 else:
-                    line_pattern = '%s\s*%s.*\n' % (line_header, 
-                                                    self.time_pattern())
+                    raise KeyError()
+
                 break
 
         if line_pattern is not None:
@@ -539,15 +550,18 @@ class FileHeaderListener(sublime_plugin.EventListener):
                 b = _.b - 1    
 
                 spaces = (index - space_start) * ' '
-                if what == 'BY':
+                if what == 'LAST_MODIFIED_BY':
                     args = get_args(syntax_type)
-                    strings = (spaces + args['last_modified_by'])
-                else:                    
+                    strings = args['last_modified_by']
+                elif what == 'LAST_MODIFIED_TIME':                    
                     strftime = get_strftime()
                     time = datetime.now().strftime(strftime)
-                    strings = (spaces + time)
+                    strings = time
+                elif what == 'FILE_NAME':
+                    strings = 'undefined' if view.file_name() is None else view.file_name().split('/')[-1]
+
                 view.run_command('file_header_replace', 
-                                 {'a': a, 'b': b,'strings': strings})
+                                 {'a': a, 'b': b, 'strings': spaces + strings})
 
     def insert_template(self, view, exists):
         enable_add_template_to_empty_file = Settings().get(
@@ -581,12 +595,13 @@ class FileHeaderListener(sublime_plugin.EventListener):
             del FileHeaderListener.new_view_id[index]
         else:
             if view.is_dirty():
-                self.update_last_modified(view, 'by')
-                self.update_last_modified(view, 'time')
+                self.update_automatically(view, 'last_modified_by')
+                self.update_automatically(view, 'last_modified_time')
 
     def on_activated(self, view):
-        settings = view.settings()
+        self.update_automatically(view, 'file_name')
 
+        settings = view.settings()
         c_time, _ = get_time(view.file_name())
         if c_time is not None and settings.get('c_time', None) is None:
             settings.set('c_time', pickle.dumps(c_time))
