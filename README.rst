@@ -263,7 +263,15 @@ There are two kinds of arguments: **options** and kinds of languages variables s
 
                 FileHeader will set it automatically when you save the file.
 
-                Can't be set custom
+                Can't be set custom.
+
+            - file_name
+
+            The name of current file.
+
+            FileHeader will update it automatically when you open it.
+
+            Can't be set custom.
             */
 
             /*
