@@ -267,11 +267,11 @@ There are two kinds of arguments: **options** and kinds of languages variables s
 
             - file_name
 
-            The name of current file.
+                The name of current file.
 
-            FileHeader will update it automatically when you open it.
+                FileHeader will update it automatically when you open it.
 
-            Can't be set custom.
+                Can't be set custom.
             */
 
             /*
