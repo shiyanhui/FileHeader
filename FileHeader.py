@@ -3,7 +3,7 @@
 # @Author: lime
 # @Date:   2013-10-28 13:39:48
 # @Last Modified by:   lime
-# @Last Modified time: 2014-02-01 20:53:14
+# @Last Modified time: 2014-02-07 18:02:05
 
 import os
 import sys
@@ -227,14 +227,15 @@ def get_syntax_type(name):
     syntax_type = Settings().get('syntax_when_not_match')
     file_suffix_mapping = Settings().get('file_suffix_mapping')
 
-    name = name.split('.')
-    if len(name) <= 1:
-        return syntax_type
+    if name is not None:
+        name = name.split('.')
+        if len(name) <= 1:
+            return syntax_type
 
-    try:
-        syntax_type = file_suffix_mapping[name[-1]]
-    except KeyError:
-        pass
+        try:
+            syntax_type = file_suffix_mapping[name[-1]]
+        except KeyError:
+            pass
 
     return syntax_type
 
@@ -540,7 +541,6 @@ class FileHeaderListener(sublime_plugin.EventListener):
                     line_pattern = '%s\s*%s.*\n' % (line_header, self.time_pattern())
                 else:
                     raise KeyError()
-
                 break
 
         if line_pattern is not None:
@@ -549,19 +549,20 @@ class FileHeaderListener(sublime_plugin.EventListener):
                 a = _.a + space_start
                 b = _.b - 1    
 
-                spaces = (index - space_start) * ' '
                 if what == 'LAST_MODIFIED_BY':
-                    args = get_args(syntax_type)
-                    strings = args['last_modified_by']
+                    strings = get_args(syntax_type)['last_modified_by']
                 elif what == 'LAST_MODIFIED_TIME':                    
-                    strftime = get_strftime()
-                    time = datetime.now().strftime(strftime)
-                    strings = time
+                    strings = datetime.now().strftime(get_strftime())
                 elif what == 'FILE_NAME':
                     strings = 'undefined' if view.file_name() is None else view.file_name().split('/')[-1]
 
-                view.run_command('file_header_replace', 
-                                 {'a': a, 'b': b, 'strings': spaces + strings})
+                spaces = (index - space_start) * ' '
+                strings = spaces + strings
+
+                region = sublime.Region(int(a), int(b))
+                if view.substr(region) != strings:
+                    view.run_command('file_header_replace', 
+                                     {'a': a, 'b': b, 'strings': strings})
 
     def insert_template(self, view, exists):
         enable_add_template_to_empty_file = Settings().get(
