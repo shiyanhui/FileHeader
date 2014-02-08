@@ -78,6 +78,7 @@
         "asp": "ASP",
         "aspx": "ASP",
         "bat": "Batch File",
+        "cmd": "Batch File",        
         "c": "C",
         "cs": "C#",
         "cpp": "C++",
