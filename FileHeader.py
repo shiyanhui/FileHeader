@@ -26,6 +26,7 @@ else:
     import subprocess as process
 
 
+LOADED = False
 PLUGIN_NAME = 'FileHeader'
 PACKAGES_PATH = sublime.packages_path()
 PLUGIN_PATH = os.path.join(PACKAGES_PATH, PLUGIN_NAME)
@@ -41,6 +42,7 @@ sys.path.insert(0, PLUGIN_PATH)
 def plugin_loaded():
     '''ST3'''
 
+    global LOADED
     global PACKAGES_PATH
     global PLUGIN_PATH
     global HEADER_PATH
@@ -48,6 +50,7 @@ def plugin_loaded():
     global INSTALLED_PLGIN_PATH
     global IS_ST3
 
+    LOADED = False
     PACKAGES_PATH = sublime.packages_path()
     PLUGIN_PATH = os.path.join(PACKAGES_PATH, PLUGIN_NAME)
     HEADER_PATH = os.path.join(PLUGIN_PATH, 'template/header')
@@ -58,7 +61,7 @@ def plugin_loaded():
 
     sys.path.insert(0, PLUGIN_PATH)
 
-    if INSTALLED_PLGIN_PATH != PLUGIN_PATH:
+    if INSTALLED_PLGIN_PATH != PLUGIN_PATH and not LOADED:
         if os.path.exists(PLUGIN_PATH):
             try:
                 shutil.rmtree(PLUGIN_PATH)
@@ -72,6 +75,8 @@ def plugin_loaded():
         for f in z.namelist():
             z.extract(f, PLUGIN_PATH)
         z.close()
+
+        LOADED = True
 
 
 def Window():
@@ -554,7 +559,7 @@ class FileHeaderListener(sublime_plugin.EventListener):
                 elif what == 'LAST_MODIFIED_TIME':                    
                     strings = datetime.now().strftime(get_strftime())
                 elif what == 'FILE_NAME':
-                    strings = 'undefined' if view.file_name() is None else view.file_name().split('/')[-1]
+                    strings = 'undefined' if view.file_name() is None else os.path.basename(view.file_name())
 
                 spaces = (index - space_start) * ' '
                 strings = spaces + strings
