@@ -3,7 +3,7 @@
 # @Author: lime
 # @Date:   2013-10-28 13:39:48
 # @Last Modified by:   lime
-# @Last Modified time: 2014-02-07 18:02:05
+# @Last Modified time: 2014-03-05 10:16:24
 
 import os
 import sys
@@ -17,6 +17,7 @@ import getpass
 import shutil
 import time
 import pickle
+import filecmp
 
 from datetime import datetime
 
@@ -26,8 +27,8 @@ else:
     import subprocess as process
 
 
-LOADED = False
 PLUGIN_NAME = 'FileHeader'
+INSTALLED_PLUGIN_NAME = '%s.sublime-package' % PLUGIN_NAME
 PACKAGES_PATH = sublime.packages_path()
 PLUGIN_PATH = os.path.join(PACKAGES_PATH, PLUGIN_NAME)
 HEADER_PATH = os.path.join(PLUGIN_PATH, 'template/header')
@@ -37,7 +38,6 @@ INSTALLED_PLGIN_PATH = os.path.abspath(os.path.dirname(__file__))
 IS_ST3 = sublime.version() >= '3'
 
 sys.path.insert(0, PLUGIN_PATH)
-
 
 def plugin_loaded():
     '''ST3'''
@@ -50,7 +50,9 @@ def plugin_loaded():
     global INSTALLED_PLGIN_PATH
     global IS_ST3
 
-    LOADED = False
+    PLUGIN_NAME = 'FileHeader'
+    INSTALLED_PLUGIN_NAME = '%s.sublime-package' % PLUGIN_NAME
+
     PACKAGES_PATH = sublime.packages_path()
     PLUGIN_PATH = os.path.join(PACKAGES_PATH, PLUGIN_NAME)
     HEADER_PATH = os.path.join(PLUGIN_PATH, 'template/header')
@@ -61,13 +63,17 @@ def plugin_loaded():
 
     sys.path.insert(0, PLUGIN_PATH)
 
-    if INSTALLED_PLGIN_PATH != PLUGIN_PATH and not LOADED:
+    if INSTALLED_PLGIN_PATH != PLUGIN_PATH:
+        _ = os.path.join(PLUGIN_PATH, INSTALLED_PLUGIN_NAME)
+        if os.path.exists(_) and filecmp.cmp(_, INSTALLED_PLGIN_PATH):
+            return
+
         if os.path.exists(PLUGIN_PATH):
             try:
                 shutil.rmtree(PLUGIN_PATH)
             except:
                 pass
-    
+        
         if not os.path.exists(PLUGIN_PATH):
             os.mkdir(PLUGIN_PATH)
 
@@ -76,7 +82,7 @@ def plugin_loaded():
             z.extract(f, PLUGIN_PATH)
         z.close()
 
-        LOADED = True
+        shutil.copyfile(INSTALLED_PLGIN_PATH, _)
 
 
 def Window():
