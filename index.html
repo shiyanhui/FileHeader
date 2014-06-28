@@ -4,28 +4,40 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
     <title>Fileheader by shiyanhui</title>
-
     <link rel="stylesheet" href="stylesheets/styles.css">
     <link rel="stylesheet" href="stylesheets/pygment_trac.css">
-    <script src="javascripts/scale.fix.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="javascripts/main.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
 
-    <!--[if lt IE 9]>
-    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
   </head>
   <body>
-    <div class="wrapper">
+
       <header>
         <h1>Fileheader</h1>
         <p>A powerful file templating plugin for ST2/ST3</p>
-        <p class="view"><a href="https://github.com/shiyanhui/FileHeader">View the Project on GitHub <small>shiyanhui/FileHeader</small></a></p>
-        <ul>
-          <li><a href="https://github.com/shiyanhui/FileHeader/zipball/master">Download <strong>ZIP File</strong></a></li>
-          <li><a href="https://github.com/shiyanhui/FileHeader/tarball/master">Download <strong>TAR Ball</strong></a></li>
-          <li><a href="https://github.com/shiyanhui/FileHeader">View On <strong>GitHub</strong></a></li>
-        </ul>
       </header>
+
+      <div id="banner">
+        <span id="logo"></span>
+
+        <a href="https://github.com/shiyanhui/FileHeader" class="button fork"><strong>View On GitHub</strong></a>
+        <div class="downloads">
+          <span>Downloads:</span>
+          <ul>
+            <li><a href="https://github.com/shiyanhui/FileHeader/zipball/master" class="button">ZIP</a></li>
+            <li><a href="https://github.com/shiyanhui/FileHeader/tarball/master" class="button">TAR</a></li>
+          </ul>
+        </div>
+      </div><!-- end banner -->
+
+    <div class="wrapper">
+      <nav>
+        <ul></ul>
+      </nav>
       <section>
         <p><strong>FileHeader</strong>是一个Sublime Text的File Templating插件。目前ST已经有几款File Templating插件了，像SublimeTmpl、Template​Ninja、File​Templates等，但是这些插件的功能太简单了，他们几乎都使用了ST的内置snippets来实现模板的渲染，并且支持的语言很有限(像SublimeTmpl仅支持Python、Ruby、JavaScript、PHP、HTML、CSS、XML)，有的插件仅仅支持ST2(File​Templates)，还有的使用起来及其不效率。</p>
 
@@ -111,11 +123,11 @@
 
 <p>详细设置及文档请看<a href="https://github.com/shiyanhui/FileHeader">GitHub地址</a>。</p>
       </section>
+      <footer>
+        <p>Project maintained by <a href="https://github.com/shiyanhui">shiyanhui</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://twitter.com/michigangraham">mattgraham</a></small></p>
+      </footer>
     </div>
-    <footer>
-      <p>Project maintained by <a href="https://github.com/shiyanhui">shiyanhui</a></p>
-      <p>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></p>
-    </footer>
     <!--[if !IE]><script>fixScale(document);</script><![endif]-->
               <script type="text/javascript">
             var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
