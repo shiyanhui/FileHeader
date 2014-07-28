@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 # @Author: lime
 # @Date:   2013-10-28 13:39:48
-# @Last Modified by:   lime
-# @Last Modified time: 2014-03-05 10:16:24
+# @Last Modified by:   Lime
+# @Last Modified time: 2014-07-28 13:11:53
 
 import os
 import sys
@@ -300,7 +300,12 @@ class FileHeaderNewFileCommand(sublime_plugin.WindowCommand):
             return
 
         new_file = Window().open_file(path)
-        block(new_file, new_file.set_syntax_file, get_syntax_file(syntax_type))
+
+        try:
+            block(new_file, new_file.set_syntax_file, get_syntax_file(syntax_type))
+        except:
+            pass
+
         block(new_file, new_file.show, 0)
 
     def new_view(self, syntax_type, name):
@@ -308,7 +313,11 @@ class FileHeaderNewFileCommand(sublime_plugin.WindowCommand):
         new_file = Window().new_file()
         new_file.set_name(name)
         new_file.run_command('insert', {'characters': header})
-        new_file.set_syntax_file(get_syntax_file(syntax_type))
+
+        try:
+            new_file.set_syntax_file(get_syntax_file(syntax_type))
+        except:
+            pass
 
     def get_path(self, paths):
         path = None
