@@ -3,7 +3,7 @@
 # @Author: lime
 # @Date:   2013-10-28 13:39:48
 # @Last Modified by:   Lime
-# @Last Modified time: 2014-07-28 18:05:30
+# @Last Modified time: 2014-07-28 18:18:50
 
 import os
 import sys
@@ -105,11 +105,13 @@ def get_template_part(syntax_type, part):
     tmpl_file = os.path.join(path, tmpl_name)
 
     custom_template_path = Settings().get('custom_template_%s_path' % part)
+    print(custom_template_path)
     if custom_template_path:
         _ = os.path.join(custom_template_path, tmpl_name)
         if os.path.exists(_) and os.path.isfile(_):
             tmpl_file = _
 
+    print(tmpl_file)
     try:
         template_file = open(tmpl_file, 'r')
         contents = template_file.read()
