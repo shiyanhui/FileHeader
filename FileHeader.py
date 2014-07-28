@@ -3,7 +3,7 @@
 # @Author: lime
 # @Date:   2013-10-28 13:39:48
 # @Last Modified by:   Lime
-# @Last Modified time: 2014-07-28 13:11:53
+# @Last Modified time: 2014-07-28 18:05:30
 
 import os
 import sys
@@ -115,7 +115,6 @@ def get_template_part(syntax_type, part):
         contents = template_file.read()
         template_file.close()
     except Exception as e:
-        sublime.error_message(str(e))
         contents = ''
     return contents
 
@@ -226,8 +225,7 @@ def render_template(syntax_type, part=None, options={}):
             template = Template(get_template(syntax_type))
 
         render_string = template.render(get_args(syntax_type, options))
-    except Exception as e:
-        sublime.error_message(str(e))
+    except:
         render_string = ''
     return render_string
 
@@ -294,7 +292,7 @@ class FileHeaderNewFileCommand(sublime_plugin.WindowCommand):
         try:
             with open(path, 'w+') as f:
                 f.write(header)
-                f.close()
+
         except Exception as e:
             sublime.error_message(str(e))
             return
