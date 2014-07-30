@@ -272,6 +272,19 @@ There are two kinds of arguments: **options** and kinds of languages variables s
                 FileHeader will update it automatically when you open it.
 
                 Can't be set custom.
+
+            - project_name
+
+                The project name.
+
+                Can't be set custom.
+
+            - path
+
+                The absolute path of the current file.
+
+                Can't be set custom.
+
             */
 
             /*
