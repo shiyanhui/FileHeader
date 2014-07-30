@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 # @Author: lime
 # @Date:   2013-10-28 13:39:48
-# @Last Modified by:   Lime
-# @Last Modified time: 2014-07-28 18:18:50
+# @Last Modified by:   Dimitrios Katsaros
+# @Last Modified time: 2014-07-28 19:25:26
 
 import os
 import sys
@@ -149,6 +149,14 @@ def get_user():
 
     return user
 
+def get_project_name():
+    '''Get project name'''
+    project_data = sublime.active_window().project_data()
+    if project_data:
+        project = os.path.basename(project_data['folders'][0]['path'])
+    else:
+        project = None
+    return project
 
 def get_time(path):
     c_time = m_time = None
@@ -195,6 +203,10 @@ def get_args(syntax_type, options={}):
         path = options.get('path', None)
         return 'undefined' if path is None else os.path.basename(path)
 
+    def get_path():
+        path = options.get('path', None)
+        return 'undefined' if path is None else path
+
     args = Settings().get('Default')
     args.update(Settings().get(syntax_type, {}))
 
@@ -204,7 +216,9 @@ def get_args(syntax_type, options={}):
     args.update({
         'create_time': c_time.strftime(format),
         'last_modified_time': m_time.strftime(format),
-        'file_name': get_file_name()
+        'file_name': get_file_name(),
+        'project_name' : get_project_name(),
+        'path' : get_path(),
     })
 
     user = get_user()
@@ -289,7 +303,7 @@ class FileHeaderNewFileCommand(sublime_plugin.WindowCommand):
             sublime.error_message('File exists!')
             return
 
-        header = render_template(syntax_type)
+        header = render_template(syntax_type, options={'path': path})
 
         try:
             with open(path, 'w+') as f:
