@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 # @Author: lime
 # @Date:   2013-10-28 13:39:48
-# @Last Modified by:   Dimitrios Katsaros
-# @Last Modified time: 2014-07-28 19:25:26
+# @Last Modified by:   Lime
+# @Last Modified time: 2014-07-31 10:19:46
 
 import os
 import sys
@@ -149,6 +149,7 @@ def get_user():
 
     return user
 
+
 def get_project_name():
     '''Get project name'''
     project_data = sublime.active_window().project_data()
@@ -157,6 +158,25 @@ def get_project_name():
     else:
         project = None
     return project
+
+
+def get_file_path(path):
+    '''Get absolute path of the file'''
+
+    return 'undefined' if path is None else path
+
+
+def get_file_name(path):
+    '''Get name of the file'''
+
+    return 'undefined' if path is None else os.path.basename(path)
+
+
+def get_file_name_without_extension(file_name):
+    '''Get name of the file without extension'''
+
+    return '.'.join(file_name.split('.')[:-1]) or file_name
+
 
 def get_time(path):
     c_time = m_time = None
@@ -199,26 +219,23 @@ def get_args(syntax_type, options={}):
 
         return c_time, m_time
 
-    def get_file_name():
-        path = options.get('path', None)
-        return 'undefined' if path is None else os.path.basename(path)
-
-    def get_path():
-        path = options.get('path', None)
-        return 'undefined' if path is None else path
-
     args = Settings().get('Default')
     args.update(Settings().get(syntax_type, {}))
 
     format = get_strftime()
     c_time, m_time = get_st3_time() if IS_ST3 else get_st2_time()
-    
+        
+    file_path = get_file_path(options.get('path', None))
+    file_name = get_file_name(options.get('path', None))
+    file_name_without_extension = get_file_name_without_extension(file_name)
+
     args.update({
         'create_time': c_time.strftime(format),
         'last_modified_time': m_time.strftime(format),
-        'file_name': get_file_name(),
         'project_name' : get_project_name(),
-        'path' : get_path(),
+        'file_name': file_name,
+        'file_name_without_extension': file_name_without_extension,
+        'file_path' : file_path
     })
 
     user = get_user()
@@ -528,11 +545,19 @@ class FileHeaderReplaceCommand(sublime_plugin.TextCommand):
         self.view.replace(edit, region, strings)
 
 
+LAST_MODIFIED_BY = 'LAST_MODIFIED_BY'
+LAST_MODIFIED_TIME = 'LAST_MODIFIED_TIME'
+FILE_NAME = 'FILE_NAME'
+FILE_NAME_WITHOUT_EXTENSION = 'FILE_NAME_WITHOUT_EXTENSION'
+FILE_PATH = 'FILE_PATH'
+
 class FileHeaderListener(sublime_plugin.EventListener):
 
     LAST_MODIFIED_BY_REGEX = re.compile('\{\{\s*last_modified_by\s*\}\}')
     LAST_MODIFIED_TIME_REGEX = re.compile('\{\{\s*last_modified_time\s*\}\}')
     FILE_NAME_REGEX = re.compile('\{\{\s*file_name\s*\}\}')
+    FILE_NAME_WITHOUT_EXTENSION_REGEX = re.compile('\{\{\s*file_name_without_extension\s*\}\}')
+    FILE_PATH_REGEX = re.compile('\{\{\s*file_path\s*\}\}')
 
     new_view_id = []
 
@@ -547,7 +572,6 @@ class FileHeaderListener(sublime_plugin.EventListener):
         return _[choice]
     
     def update_automatically(self, view, what):
-        what = what.upper()
         syntax_type = get_syntax_type(view.file_name())
 
         template = get_template_part(syntax_type, 'header')    
@@ -569,12 +593,16 @@ class FileHeaderListener(sublime_plugin.EventListener):
                         break       
 
                 line_header = re.escape(line_header)
-                if what == 'LAST_MODIFIED_BY' or what == 'FILE_NAME':
+                if what == LAST_MODIFIED_BY or what == FILE_NAME or \
+                        what == FILE_NAME_WITHOUT_EXTENSION or what == FILE_PATH:
                     line_pattern = '%s.*\n' % line_header
-                elif what == 'LAST_MODIFIED_TIME':
+
+                elif what == LAST_MODIFIED_TIME:
                     line_pattern = '%s\s*%s.*\n' % (line_header, self.time_pattern())
+
                 else:
                     raise KeyError()
+
                 break
 
         if line_pattern is not None:
@@ -583,12 +611,20 @@ class FileHeaderListener(sublime_plugin.EventListener):
                 a = _.a + space_start
                 b = _.b - 1    
 
-                if what == 'LAST_MODIFIED_BY':
+                file_name = get_file_name(view.file_name())
+                file_name_without_extension = get_file_name_without_extension(file_name)
+                file_path = get_file_path(view.file_name())
+
+                if what == LAST_MODIFIED_BY:
                     strings = get_args(syntax_type)['last_modified_by']
-                elif what == 'LAST_MODIFIED_TIME':                    
+                elif what == LAST_MODIFIED_TIME:                    
                     strings = datetime.now().strftime(get_strftime())
-                elif what == 'FILE_NAME':
-                    strings = 'undefined' if view.file_name() is None else os.path.basename(view.file_name())
+                elif what == FILE_NAME:
+                    strings = file_name
+                elif what == FILE_NAME_WITHOUT_EXTENSION:
+                    strings = file_name_without_extension
+                elif what == FILE_PATH:
+                    strings = file_path
 
                 spaces = (index - space_start) * ' '
                 strings = spaces + strings
@@ -630,11 +666,13 @@ class FileHeaderListener(sublime_plugin.EventListener):
             del FileHeaderListener.new_view_id[index]
         else:
             if view.is_dirty():
-                self.update_automatically(view, 'last_modified_by')
-                self.update_automatically(view, 'last_modified_time')
+                self.update_automatically(view, LAST_MODIFIED_BY)
+                self.update_automatically(view, LAST_MODIFIED_TIME)
 
     def on_activated(self, view):
-        self.update_automatically(view, 'file_name')
+        block(view, self.update_automatically, view, FILE_NAME)
+        block(view, self.update_automatically, view, FILE_NAME_WITHOUT_EXTENSION)
+        block(view, self.update_automatically, view, FILE_PATH)
 
         settings = view.settings()
         c_time, _ = get_time(view.file_name())
