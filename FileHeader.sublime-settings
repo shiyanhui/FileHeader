@@ -194,6 +194,8 @@
 
             The project name.
 
+            Note: `project_name` only works in ST3.
+
             Can't be set custom.
         */
 
