@@ -3,7 +3,7 @@
 # @Author: lime
 # @Date:   2013-10-28 13:39:48
 # @Last Modified by:   Lime
-# @Last Modified time: 2014-07-31 10:19:46
+# @Last Modified time: 2014-08-02 17:43:53
 
 import os
 import sys
@@ -152,11 +152,10 @@ def get_user():
 
 def get_project_name():
     '''Get project name'''
+
     project_data = sublime.active_window().project_data()
-    if project_data:
-        project = os.path.basename(project_data['folders'][0]['path'])
-    else:
-        project = None
+    project = os.path.basename(project_data['folders'][0]['path']) if project_data else None
+
     return project
 
 
@@ -232,11 +231,13 @@ def get_args(syntax_type, options={}):
     args.update({
         'create_time': c_time.strftime(format),
         'last_modified_time': m_time.strftime(format),
-        'project_name' : get_project_name(),
         'file_name': file_name,
         'file_name_without_extension': file_name_without_extension,
         'file_path' : file_path
     })
+
+    if IS_ST3:
+        args.update({'project_name': get_project_name()})
 
     user = get_user()
     if 'author' not in args:

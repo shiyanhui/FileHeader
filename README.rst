@@ -293,6 +293,8 @@ There are two kinds of arguments: **options** and kinds of languages variables s
 
                 The project name.
 
+                Note: `project_name` only works in ST3.
+
                 Can't be set custom.
             */
 
