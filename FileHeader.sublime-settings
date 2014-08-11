@@ -13,22 +13,28 @@
     */
     "time_format": 0,
     /*
+    The custom time format. It will format `create_time` and `last_modified_time`
+    instead of `time_format` if you set it. The time format refers to`
+    https://docs.python.org/2/library/datetime.html#strftime-and-strptime-behavior`.
+    */
+    "custom_time_format": "",
+    /*
     Whether add template to the empty file.
 
-    It's useful when you create new file through other command, for 
+    It's useful when you create new file through other command, for
     example, the default Sublime Text's **New File...** or other plugin.
     */
     "enable_add_template_to_empty_file": true,
     /*
-    Set your custom template header path here, it is a directory in which 
-    you write your own header files. The file name should be a language, 
-    "Python.tmpl" for example. 
+    Set your custom template header path here, it is a directory in which
+    you write your own header files. The file name should be a language,
+    "Python.tmpl" for example.
     */
     "custom_template_header_path": "",
     /*
-    Set your custom template body path here, it is a directory in which 
-    you write your own body files. The file name should be a language, 
-    "Python.tmpl" for example. 
+    Set your custom template body path here, it is a directory in which
+    you write your own body files. The file name should be a language,
+    "Python.tmpl" for example.
 
     The template structure is:
 
@@ -40,23 +46,23 @@
     */
     "custom_template_body_path": "",
     /*
-    Whether show input panel when you add header. The default file which 
+    Whether show input panel when you add header. The default file which
     you add header to is the current file you edit.
     */
     "show_input_panel_when_add_header": true,
     /*
-    Whether open file when you add header to files in the specified 
+    Whether open file when you add header to files in the specified
     directory.
     */
     "open_file_when_add_header_to_directory": true,
     /*
-    Whether enable add header to hidden directory. If false, FileHeader 
-    won't add header to files under it. 
+    Whether enable add header to hidden directory. If false, FileHeader
+    won't add header to files under it.
     */
     "enable_add_header_to_hidden_dir": false,
     /*
-    Whether enable add header to hidden file. If false, FileHeader 
-    won't add header to it. 
+    Whether enable add header to hidden file. If false, FileHeader
+    won't add header to it.
     */
     "enable_add_header_to_hidden_file": false,
     /*
@@ -68,7 +74,7 @@
     "syntax_when_not_match": "Text",
     /*
     FileHeader will judge programming language according to file suffix.
-    You can add more file suffix here. Note: language should be one of 
+    You can add more file suffix here. Note: language should be one of
     that under **Default**. If FileHeader don't find the suffix,
     FileHeader will set language as **syntax_when_not_match** above.
     */
@@ -78,7 +84,7 @@
         "asp": "ASP",
         "aspx": "ASP",
         "bat": "Batch File",
-        "cmd": "Batch File",        
+        "cmd": "Batch File",
         "c": "C",
         "cs": "C#",
         "cpp": "C++",
@@ -119,7 +125,7 @@
     Variables
     =========
     */
-    
+
     /*
     Below is the variables you render templater.
     */
@@ -127,39 +133,39 @@
         /*
         Builtin Variables
         =================
-    
+
         - create_time
 
             The file created time. It will be automatically set when you create
-            a new file if you use it. 
+            a new file if you use it.
 
             Can't be set custom.
 
         - author
 
-            The file creator. 
+            The file creator.
 
             FileHeader will set it automatically. If it's in
-            a git repository and the `user.name` has been set, `autor` 
-            will set to `user.name`, otherwise it will be set to current 
+            a git repository and the `user.name` has been set, `autor`
+            will set to `user.name`, otherwise it will be set to current
             system user.
 
             Can be set custom.
 
         - last_modified_by
 
-            The file last modified by who? It is specially useful when 
-            cooperation programming. 
+            The file last modified by who? It is specially useful when
+            cooperation programming.
 
             FileHeader will set it automatically. If it's in
-            a git repository and the `user.name` has been set, `autor` 
-            will set to `user.name`, otherwise it will be set to current 
-            system logined user. 
+            a git repository and the `user.name` has been set, `autor`
+            will set to `user.name`, otherwise it will be set to current
+            system logined user.
 
             Can be set custom.
 
         - last_modified_time
-            
+
             The file last modified time.
 
             FileHeader will set it automatically when you save the file.
@@ -208,7 +214,7 @@
         // You can add more here......
     },
     /*
-    You can set different variables in different languages. It will cover 
+    You can set different variables in different languages. It will cover
     that in "Default".
     */
     "ASP": {},
