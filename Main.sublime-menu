@@ -13,7 +13,6 @@
                         "caption": "File Header",
                         "children":
                         [
-                            
                             {
                                 "command": "open_file",
                                 "args": {"file": "${packages}/FileHeader/FileHeader.sublime-settings"},

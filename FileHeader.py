@@ -3,8 +3,7 @@
 # @Author: lime
 # @Date:   2013-10-28 13:39:48
 # @Last Modified by:   Lime
-# @Last Modified time: 2014-08-11 19:45:15
-
+# @Last Modified time: 2014-11-25 14:20:32
 
 import os
 import sys
@@ -26,7 +25,6 @@ if sys.version < '3':
     import commands as process
 else:
     import subprocess as process
-
 
 PLUGIN_NAME = 'FileHeader'
 INSTALLED_PLUGIN_NAME = '%s.sublime-package' % PLUGIN_NAME
@@ -106,7 +104,6 @@ def get_template_part(syntax_type, part):
     tmpl_file = os.path.join(path, tmpl_name)
 
     custom_template_path = Settings().get('custom_template_%s_path' % part)
-    print(custom_template_path)
     if custom_template_path:
         _ = os.path.join(custom_template_path, tmpl_name)
         if os.path.exists(_) and os.path.isfile(_):
@@ -123,8 +120,9 @@ def get_template_part(syntax_type, part):
 
 
 def get_template(syntax_type):
-    parts = ['header', 'body']
-    return ''.join([get_template_part(syntax_type, part) for part in parts])
+    return ''.join(
+        [get_template_part(syntax_type, part)
+            for part in ['header', 'body']])
 
 
 def get_strftime():
@@ -160,7 +158,8 @@ def get_project_name():
     '''Get project name'''
 
     project_data = sublime.active_window().project_data()
-    project = os.path.basename(project_data['folders'][0]['path']) if project_data else None
+    project = os.path.basename(
+        project_data['folders'][0]['path']) if project_data else None
 
     return project
 
@@ -275,14 +274,23 @@ def get_syntax_type(name):
 
     syntax_type = Settings().get('syntax_when_not_match')
     file_suffix_mapping = Settings().get('file_suffix_mapping')
+    extension_equivalence = Settings().get('extension_equivalence')
 
     if name is not None:
         name = name.split('.')
         if len(name) <= 1:
             return syntax_type
 
+        for i in range(1, len(name)):
+            suffix = '%s' % '.'.join(name[i:])
+            if suffix in extension_equivalence:
+                suffix = extension_equivalence[suffix]
+                break
+        else:
+            suffix = name[-1]
+
         try:
-            syntax_type = file_suffix_mapping[name[-1]]
+            syntax_type = file_suffix_mapping[suffix]
         except KeyError:
             pass
 
@@ -340,7 +348,8 @@ class FileHeaderNewFileCommand(sublime_plugin.WindowCommand):
         new_file = Window().open_file(path)
 
         try:
-            block(new_file, new_file.set_syntax_file, get_syntax_file(syntax_type))
+            block(new_file,
+                new_file.set_syntax_file, get_syntax_file(syntax_type))
         except:
             pass
 
@@ -563,7 +572,8 @@ class FileHeaderListener(sublime_plugin.EventListener):
     LAST_MODIFIED_BY_REGEX = re.compile('\{\{\s*last_modified_by\s*\}\}')
     LAST_MODIFIED_TIME_REGEX = re.compile('\{\{\s*last_modified_time\s*\}\}')
     FILE_NAME_REGEX = re.compile('\{\{\s*file_name\s*\}\}')
-    FILE_NAME_WITHOUT_EXTENSION_REGEX = re.compile('\{\{\s*file_name_without_extension\s*\}\}')
+    FILE_NAME_WITHOUT_EXTENSION_REGEX = re.compile(
+        '\{\{\s*file_name_without_extension\s*\}\}')
     FILE_PATH_REGEX = re.compile('\{\{\s*file_path\s*\}\}')
 
     new_view_id = []
@@ -601,11 +611,13 @@ class FileHeaderListener(sublime_plugin.EventListener):
 
                 line_header = re.escape(line_header)
                 if what == LAST_MODIFIED_BY or what == FILE_NAME or \
-                        what == FILE_NAME_WITHOUT_EXTENSION or what == FILE_PATH:
+                        what == FILE_NAME_WITHOUT_EXTENSION or \
+                        what == FILE_PATH:
                     line_pattern = '%s.*\n' % line_header
 
                 elif what == LAST_MODIFIED_TIME:
-                    line_pattern = '%s\s*%s.*\n' % (line_header, self.time_pattern())
+                    line_pattern = '%s\s*%s.*\n' % (
+                        line_header, self.time_pattern())
 
                 else:
                     raise KeyError()
@@ -619,7 +631,8 @@ class FileHeaderListener(sublime_plugin.EventListener):
                 b = _.b - 1
 
                 file_name = get_file_name(view.file_name())
-                file_name_without_extension = get_file_name_without_extension(file_name)
+                file_name_without_extension = get_file_name_without_extension(
+                    file_name)
                 file_path = get_file_path(view.file_name())
 
                 if what == LAST_MODIFIED_BY:
