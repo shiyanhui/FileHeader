@@ -3,7 +3,7 @@
 # @Author: lime
 # @Date:   2013-10-28 13:39:48
 # @Last Modified by:   Lime
-# @Last Modified time: 2014-11-25 14:20:32
+# @Last Modified time: 2014-11-25 14:23:57
 
 import os
 import sys
@@ -282,7 +282,7 @@ def get_syntax_type(name):
             return syntax_type
 
         for i in range(1, len(name)):
-            suffix = '%s' % '.'.join(name[i:])
+            suffix = '.'.join(name[i:])
             if suffix in extension_equivalence:
                 suffix = extension_equivalence[suffix]
                 break
