@@ -1,13 +1,13 @@
 [
     {
-        "keys": ["ctrl+alt+n"], 
+        "keys": ["ctrl+alt+n"],
         "command": "file_header_new_file",
         "args":{
             "paths": []
         }
     },
     {
-        "keys": ["ctrl+alt+a"], 
+        "keys": ["ctrl+alt+a"],
         "command": "file_header_add_header",
         "args":{
             "paths": []

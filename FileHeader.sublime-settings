@@ -78,7 +78,7 @@
     that under **Default**. If FileHeader don't find the suffix,
     FileHeader will set language as **syntax_when_not_match** above.
     */
-    "file_suffix_mapping":{
+    "file_suffix_mapping": {
         "as": "ActionScript",
         "scpt": "AppleScript",
         "asp": "ASP",
@@ -119,6 +119,14 @@
         "tcl": "TCL",
         "txt": "Text",
         "xml": "XML"
+    },
+    /*
+    Set special file suffix equivalence. Take `blade.php` for example,
+    FileHeader will initial file with suffix `blade.php` with that of `html`.
+
+    */
+    "extension_equivalence": {
+        "blade.php": "html",
     },
 
     /*
@@ -204,7 +212,6 @@
 
             Can't be set custom.
         */
-
 
         /*
         Email
