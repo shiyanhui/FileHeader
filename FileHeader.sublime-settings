@@ -126,7 +126,7 @@
 
     */
     "extension_equivalence": {
-        "blade.php": "html",
+        "blade.php": "html"
     },
 
     /*
