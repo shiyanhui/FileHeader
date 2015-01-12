@@ -3,7 +3,7 @@
 # @Author: lime
 # @Date:   2013-10-28 13:39:48
 # @Last Modified by:   Lime
-# @Last Modified time: 2014-11-25 14:23:57
+# @Last Modified time: 2015-01-12 09:51:33
 
 import os
 import sys
@@ -109,7 +109,6 @@ def get_template_part(syntax_type, part):
         if os.path.exists(_) and os.path.isfile(_):
             tmpl_file = _
 
-    print(tmpl_file)
     try:
         template_file = open(tmpl_file, 'r')
         contents = template_file.read()
