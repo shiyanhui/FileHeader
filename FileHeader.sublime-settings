@@ -114,6 +114,7 @@
         "rst": "RestructuredText",
         "rb": "Ruby",
         "scala": "Scala",
+        "scss": "SCSS",
         "sh": "ShellScript",
         "sql": "SQL",
         "tcl": "TCL",
