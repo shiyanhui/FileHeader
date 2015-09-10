@@ -3,7 +3,7 @@
 # @Author: lime
 # @Date:   2013-10-28 13:39:48
 # @Last Modified by:   Lime
-# @Last Modified time: 2015-01-12 09:51:33
+# @Last Modified time: 2015-09-10 10:47:07
 
 import os
 import sys
@@ -37,6 +37,7 @@ INSTALLED_PLGIN_PATH = os.path.abspath(os.path.dirname(__file__))
 IS_ST3 = sublime.version() >= '3'
 
 sys.path.insert(0, PLUGIN_PATH)
+
 
 def plugin_loaded():
     '''ST3'''
@@ -113,7 +114,7 @@ def get_template_part(syntax_type, part):
         template_file = open(tmpl_file, 'r')
         contents = template_file.read()
         template_file.close()
-    except Exception as e:
+    except:
         contents = ''
     return contents
 
@@ -237,7 +238,7 @@ def get_args(syntax_type, options={}):
         'last_modified_time': m_time.strftime(format),
         'file_name': file_name,
         'file_name_without_extension': file_name_without_extension,
-        'file_path' : file_path
+        'file_path': file_path
     })
 
     if IS_ST3:
@@ -348,7 +349,7 @@ class FileHeaderNewFileCommand(sublime_plugin.WindowCommand):
 
         try:
             block(new_file,
-                new_file.set_syntax_file, get_syntax_file(syntax_type))
+                  new_file.set_syntax_file, get_syntax_file(syntax_type))
         except:
             pass
 
@@ -412,7 +413,7 @@ class BackgroundAddHeaderThread(threading.Thread):
 
     def run(self):
         syntax_type = get_syntax_type(self.path)
-        header = render_template(syntax_type, 'header', {'path': path})
+        header = render_template(syntax_type, 'header', {'path': self.path})
 
         try:
             with open(self.path, 'r') as f:
@@ -474,7 +475,6 @@ class FileHeaderAddHeaderCommand(sublime_plugin.WindowCommand):
         if not os.path.exists(path):
             return False
 
-        file_suffix_mapping = Settings().get('file_suffix_mapping')
         enable_add_to_hidden_dir = Settings().get(
             'enable_add_header_to_hidden_dir')
         enable_add_to_hidden_file = Settings().get(
@@ -548,8 +548,9 @@ class FileHeaderAddHeaderCommand(sublime_plugin.WindowCommand):
             return
 
         Window().run_command('hide_panel')
-        Window().show_input_panel('Modified File or Directory:', initial_text,
-                                  self.on_done, None, None)
+        Window().show_input_panel(
+            'Modified File or Directory:',
+            initial_text, self.on_done, None, None)
 
 
 class FileHeaderReplaceCommand(sublime_plugin.TextCommand):
@@ -566,8 +567,8 @@ FILE_NAME = 'FILE_NAME'
 FILE_NAME_WITHOUT_EXTENSION = 'FILE_NAME_WITHOUT_EXTENSION'
 FILE_PATH = 'FILE_PATH'
 
-class FileHeaderListener(sublime_plugin.EventListener):
 
+class FileHeaderListener(sublime_plugin.EventListener):
     LAST_MODIFIED_BY_REGEX = re.compile('\{\{\s*last_modified_by\s*\}\}')
     LAST_MODIFIED_TIME_REGEX = re.compile('\{\{\s*last_modified_time\s*\}\}')
     FILE_NAME_REGEX = re.compile('\{\{\s*file_name\s*\}\}')
@@ -602,6 +603,7 @@ class FileHeaderListener(sublime_plugin.EventListener):
                 var = search.group()
                 index = line.find(var)
 
+                line_header = ''
                 for i in range(index - 1, 0, -1):
                     if line[i] != ' ':
                         space_start = i + 1
@@ -689,9 +691,10 @@ class FileHeaderListener(sublime_plugin.EventListener):
                 self.update_automatically(view, LAST_MODIFIED_TIME)
 
     def on_activated(self, view):
-        block(view, self.update_automatically, view, FILE_NAME)
-        block(view, self.update_automatically, view, FILE_NAME_WITHOUT_EXTENSION)
         block(view, self.update_automatically, view, FILE_PATH)
+        block(view, self.update_automatically, view, FILE_NAME)
+        block(view, self.update_automatically,
+              view, FILE_NAME_WITHOUT_EXTENSION)
 
         settings = view.settings()
         c_time, _ = get_time(view.file_name())
