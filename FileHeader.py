@@ -1,30 +1,25 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# @Author: lime
+# @Author: Lime
 # @Date:   2013-10-28 13:39:48
 # @Last Modified by:   Lime
-# @Last Modified time: 2015-09-10 10:47:07
+# @Last Modified time: 2016-02-23 14:47:02
 
 import os
 import sys
 import re
-import sublime
-import sublime_plugin
 import functools
 import threading
 import zipfile
 import getpass
 import shutil
-import time
 import pickle
 import filecmp
-
+import subprocess
 from datetime import datetime
 
-if sys.version < '3':
-    import commands as process
-else:
-    import subprocess as process
+import sublime
+import sublime_plugin
+
 
 PLUGIN_NAME = 'FileHeader'
 INSTALLED_PLUGIN_NAME = '%s.sublime-package' % PLUGIN_NAME
@@ -85,6 +80,12 @@ def plugin_loaded():
         shutil.copyfile(INSTALLED_PLGIN_PATH, _)
 
 
+def getOutputError(cmd):
+    return map(str.strip, subprocess.Popen(
+        cmd, shell=True, universal_newlines=True,
+        stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate())
+
+
 def Window():
     '''Get current active window'''
 
@@ -100,29 +101,31 @@ def Settings():
 def get_template_part(syntax_type, part):
     '''Get template header or body'''
 
-    tmpl_name = '%s.tmpl' % syntax_type
-    path = HEADER_PATH if part == 'header' else BODY_PATH
-    tmpl_file = os.path.join(path, tmpl_name)
+    template_name = '%s.tmpl' % syntax_type
+    tmplate_path = os.path.join(
+        HEADER_PATH if part == 'header' else BODY_PATH, template_name)
 
     custom_template_path = Settings().get('custom_template_%s_path' % part)
     if custom_template_path:
-        _ = os.path.join(custom_template_path, tmpl_name)
-        if os.path.exists(_) and os.path.isfile(_):
-            tmpl_file = _
+        path = os.path.abspath(os.path.expanduser(os.path.expandvars(
+            os.path.join(custom_template_path, template_name))))
+
+        if os.path.exists(path) and os.path.isfile(path):
+            tmplate_path = path
 
     try:
-        template_file = open(tmpl_file, 'r')
-        contents = template_file.read()
-        template_file.close()
+        with open(tmplate_path, 'r') as f:
+            contents = f.read()
     except:
         contents = ''
     return contents
 
 
 def get_template(syntax_type):
-    return ''.join(
-        [get_template_part(syntax_type, part)
-            for part in ['header', 'body']])
+    return ''.join([
+        get_template_part(syntax_type, part)
+        for part in ['header', 'body']
+    ])
 
 
 def get_strftime():
@@ -145,12 +148,12 @@ def get_user():
     '''Get user'''
 
     user = getpass.getuser()
-    status, _ = process.getstatusoutput('git status')
-    if status == 0:
-        status, output = process.getstatusoutput('git config --get user.name')
-        if status == 0 and output:
-            user = output
 
+    output, error = getOutputError('git status')
+    if not error:
+        output, error = getOutputError('git config --get user.name')
+        if not error and output:
+            user = output
     return user
 
 
@@ -189,8 +192,8 @@ def get_time(path):
     except:
         pass
     else:
-        c_time = datetime(*time.localtime(stat.st_ctime)[:6])
-        m_time = datetime(*time.localtime(stat.st_mtime)[:6])
+        c_time, m_time = map(
+            datetime.fromtimestamp, (stat.st_ctime, stat.st_mtime))
 
     return c_time, m_time
 
@@ -258,11 +261,9 @@ def render_template(syntax_type, part=None, options={}):
 
     from jinja2 import Template
     try:
-        if part is not None:
-            template = Template(get_template_part(syntax_type, part))
-        else:
-            template = Template(get_template(syntax_type))
-
+        template = Template(
+            get_template_part(syntax_type, part)
+            if part else get_template(syntax_type))
         render_string = template.render(get_args(syntax_type, options))
     except:
         render_string = ''
@@ -400,8 +401,9 @@ class FileHeaderNewFileCommand(sublime_plugin.WindowCommand):
         path = self.get_path(paths)
 
         Window().run_command('hide_panel')
-        Window().show_input_panel('File Name:', '', functools.partial(
-                                  self.on_done, path), None, None)
+        Window().show_input_panel(
+            'File Name:', '',
+            functools.partial(self.on_done, path), None, None)
 
 
 class BackgroundAddHeaderThread(threading.Thread):
@@ -449,42 +451,46 @@ class FileHeaderAddHeaderCommand(sublime_plugin.WindowCommand):
     def is_hidden(self, path):
         '''Whether the file or dir is hidden'''
 
-        hidden = False
-        platform = sublime.platform()
+        hidden, platform = False, sublime.platform()
         if platform == 'windows':
-            status, output = process.getstatusoutput('attrib %s' % path)
-            if status == 0:
+            output, error = getOutputError('attrib %s' % path)
+            if not error:
                 try:
                     if output[4].upper() == 'H':
                         hidden = True
                 except:
                     pass
-        else:
-            basename = os.path.basename(path)
-            if basename.startswith('.'):
-                hidden = True
+        elif os.path.basename(path).startswith('.'):
+            hidden = True
         return hidden
 
     def can_add(self, path):
         '''Whether can add header to path'''
 
         def can_add_to_dir(path):
-            return enable_add_to_hidden_dir or (not enable_add_to_hidden_dir
-                                                and not self.is_hidden(path))
+            return enable_add_to_hidden_dir or (
+                not enable_add_to_hidden_dir and
+                not self.is_hidden(path))
+
+        def can_add_to_file(path):
+            return enable_add_to_hidden_file or (
+                not enable_add_to_hidden_file and
+                not self.is_hidden(path))
 
         if not os.path.exists(path):
             return False
 
-        enable_add_to_hidden_dir = Settings().get(
-            'enable_add_header_to_hidden_dir')
-        enable_add_to_hidden_file = Settings().get(
-            'enable_add_header_to_hidden_file')
+        enable_add_to_hidden_dir, enable_add_to_hidden_file = map(
+            Settings().get, (
+                'enable_add_header_to_hidden_dir',
+                'enable_add_header_to_hidden_file'
+            )
+        )
 
-        if os.path.isfile(path):
-            if can_add_to_dir(os.path.dirname(path)):
-                if enable_add_to_hidden_file or (not enable_add_to_hidden_file
-                                                 and not self.is_hidden(path)):
-                    return True
+        if (os.path.isfile(path) and
+                can_add_to_dir(os.path.dirname(path)) and
+                can_add_to_file(path)):
+            return True
 
         elif os.path.isdir(path):
             return can_add_to_dir(path)
@@ -503,8 +509,7 @@ class FileHeaderAddHeaderCommand(sublime_plugin.WindowCommand):
                   'add_file_header', {'path': path, 'part': 'header'})
             block(modified_file, modified_file.show, 0)
         else:
-            thread = BackgroundAddHeaderThread(path)
-            thread.start()
+            BackgroundAddHeaderThread(path).start()
 
     def walk(self, path):
         '''Add files in the path'''
@@ -611,18 +616,16 @@ class FileHeaderListener(sublime_plugin.EventListener):
                         break
 
                 line_header = re.escape(line_header)
-                if what == LAST_MODIFIED_BY or what == FILE_NAME or \
-                        what == FILE_NAME_WITHOUT_EXTENSION or \
-                        what == FILE_PATH:
+                if what in set([
+                        LAST_MODIFIED_BY, FILE_NAME,
+                        FILE_NAME_WITHOUT_EXTENSION, FILE_PATH]):
                     line_pattern = '%s.*\n' % line_header
 
                 elif what == LAST_MODIFIED_TIME:
                     line_pattern = '%s\s*%s.*\n' % (
                         line_header, self.time_pattern())
-
                 else:
                     raise KeyError()
-
                 break
 
         if line_pattern is not None:
@@ -652,12 +655,14 @@ class FileHeaderListener(sublime_plugin.EventListener):
 
                 region = sublime.Region(int(a), int(b))
                 if view.substr(region) != strings:
-                    view.run_command('file_header_replace',
-                                     {'a': a, 'b': b, 'strings': strings})
+                    view.run_command(
+                        'file_header_replace',
+                        {'a': a, 'b': b, 'strings': strings})
 
     def insert_template(self, view, exists):
         enable_add_template_to_empty_file = Settings().get(
-            'enable_add_template_to_empty_file')
+            'enable_add_template_to_empty_file') and view.settings().get(
+            'enable_add_template_to_empty_file', True)
 
         path = view.file_name()
         condition = (path and enable_add_template_to_empty_file
