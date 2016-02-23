@@ -1,0 +1,16 @@
+[
+    {
+        "caption": "FileHeader: New File",
+        "command": "file_header_new_file",
+        "args": {
+            "paths": []
+        }
+    },
+    {
+        "caption": "FileHeader: Add Header",
+        "command": "file_header_add_header",
+        "args": {
+            "paths": []
+        }
+    }
+]
