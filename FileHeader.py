@@ -2,7 +2,7 @@
 # @Author: Lime
 # @Date:   2013-10-28 13:39:48
 # @Last Modified by:   Lime
-# @Last Modified time: 2016-02-23 15:10:05
+# @Last Modified time: 2016-02-29 12:32:35
 
 import os
 import sys
@@ -19,7 +19,6 @@ from datetime import datetime
 
 import sublime
 import sublime_plugin
-
 
 PLUGIN_NAME = 'FileHeader'
 INSTALLED_PLUGIN_NAME = '%s.sublime-package' % PLUGIN_NAME
@@ -148,8 +147,9 @@ def get_user():
     '''Get user'''
 
     user = getpass.getuser()
+    output, error = getOutputError(
+        'cd {} && git status'.format(get_dir_path()))
 
-    output, error = getOutputError('git status')
     if not error:
         output, error = getOutputError('git config --get user.name')
         if not error and output:
@@ -165,6 +165,17 @@ def get_project_name():
         project_data['folders'][0]['path']) if project_data else None
 
     return project
+
+
+def get_dir_path():
+    '''Get current file dir path'''
+
+    view, path = Window().active_view(), None
+    if view:
+        file_name = view.file_name()
+        if file_name is not None:
+            path = os.path.dirname(file_name)
+    return path
 
 
 def get_file_path(path):
@@ -370,11 +381,7 @@ class FileHeaderNewFileCommand(sublime_plugin.WindowCommand):
     def get_path(self, paths):
         path = None
         if not paths:
-            current_view = Window().active_view()
-            if current_view:
-                file_name = current_view.file_name()
-                if file_name is not None:
-                    path = os.path.dirname(file_name)
+            path = get_dir_path()
         else:
             path = paths[0]
             if not os.path.isdir(path):
@@ -583,49 +590,23 @@ class FileHeaderListener(sublime_plugin.EventListener):
 
     new_view_id = []
 
-    def time_pattern(self):
-        choice = Settings().get('time_format')
-        _ = [0, 1, 2]
-        if choice not in _:
-            choice = 0
-
-        _ = ['\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}',
-             '\d{4}-\d{2}-\d{2}', '\d{2}:\d{2}:\d{2}']
-        return _[choice]
-
     def update_automatically(self, view, what):
         syntax_type = get_syntax_type(view.file_name())
 
-        template = get_template_part(syntax_type, 'header')
-        lines = template.split('\n')
-
         line_pattern = None
+        lines = get_template_part(syntax_type, 'header').split('\n')
         regex = getattr(FileHeaderListener, '%s_REGEX' % what)
+
         for line in lines:
             search = regex.search(line)
-
             if search is not None:
-                var = search.group()
-                index = line.find(var)
-
-                line_header = ''
+                index, line_header = line.find(search.group()), ''
                 for i in range(index - 1, 0, -1):
                     if line[i] != ' ':
                         space_start = i + 1
                         line_header = line[:space_start]
                         break
-
-                line_header = re.escape(line_header)
-                if what in set([
-                        LAST_MODIFIED_BY, FILE_NAME,
-                        FILE_NAME_WITHOUT_EXTENSION, FILE_PATH]):
-                    line_pattern = '%s.*\n' % line_header
-
-                elif what == LAST_MODIFIED_TIME:
-                    line_pattern = '%s\s*%s.*\n' % (
-                        line_header, self.time_pattern())
-                else:
-                    raise KeyError()
+                line_pattern = '{}.*\n'.format(line_header)
                 break
 
         if line_pattern is not None:
@@ -650,8 +631,7 @@ class FileHeaderListener(sublime_plugin.EventListener):
                 elif what == FILE_PATH:
                     strings = file_path
 
-                spaces = (index - space_start) * ' '
-                strings = spaces + strings
+                strings = ' ' * (index - space_start) + strings
 
                 region = sublime.Region(int(a), int(b))
                 if view.substr(region) != strings:
@@ -669,9 +649,12 @@ class FileHeaderListener(sublime_plugin.EventListener):
                      and view.size() <= 0)
 
         if exists:
-            condition = (condition and os.path.exists(path)
-                         and os.path.isfile(path)
-                         and os.path.getsize(path) <= 0)
+            condition = (
+                condition
+                and os.path.exists(path)
+                and os.path.isfile(path)
+                and os.path.getsize(path) <= 0
+            )
 
         if condition:
             block(view, view.run_command, 'add_file_header', {'path': path})
