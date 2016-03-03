@@ -2,7 +2,7 @@
 # @Author: Lime
 # @Date:   2013-10-28 13:39:48
 # @Last Modified by:   Lime
-# @Last Modified time: 2016-02-29 12:32:35
+# @Last Modified time: Thu Mar 03, 2016 07:43:26 PM
 
 import os
 import sys
@@ -600,25 +600,27 @@ class FileHeaderListener(sublime_plugin.EventListener):
         for line in lines:
             search = regex.search(line)
             if search is not None:
-                index, line_header = line.find(search.group()), ''
-                for i in range(index - 1, 0, -1):
+                variable = search.group()
+                index = line.find(variable)
+
+                line_head, line_tail = '', line[index + len(variable):]
+                for i in range(index - 1, -1, -1):
                     if line[i] != ' ':
                         space_start = i + 1
-                        line_header = line[:space_start]
+                        line_head = line[:space_start]
                         break
-                line_pattern = '{}.*\n'.format(line_header)
+
+                for r in '.^$*+?{}[]()':
+                    line_head = line_head.replace(r, '\\{}'.format(r))
+
+                line_pattern = '{}.*\n'.format(line_head)
                 break
 
         if line_pattern is not None:
             _ = view.find(line_pattern, 0)
             if(_ != sublime.Region(-1, -1) and _ is not None):
-                a = _.a + space_start
-                b = _.b - 1
-
+                a, b = _.a + space_start, _.b - 1
                 file_name = get_file_name(view.file_name())
-                file_name_without_extension = get_file_name_without_extension(
-                    file_name)
-                file_path = get_file_path(view.file_name())
 
                 if what == LAST_MODIFIED_BY:
                     strings = get_args(syntax_type)['last_modified_by']
@@ -627,11 +629,12 @@ class FileHeaderListener(sublime_plugin.EventListener):
                 elif what == FILE_NAME:
                     strings = file_name
                 elif what == FILE_NAME_WITHOUT_EXTENSION:
-                    strings = file_name_without_extension
+                    strings = get_file_name_without_extension(file_name)
                 elif what == FILE_PATH:
-                    strings = file_path
+                    strings = get_file_path(view.file_name())
 
-                strings = ' ' * (index - space_start) + strings
+                strings = '{}{}{}'.format(
+                    ' ' * (index - space_start), strings, line_tail)
 
                 region = sublime.Region(int(a), int(b))
                 if view.substr(region) != strings:
