@@ -2,7 +2,7 @@
 # @Author: Lime
 # @Date:   2013-10-28 13:39:48
 # @Last Modified by:   Lime
-# @Last Modified time: 2016-03-03 20:51:17
+# @Last Modified time: 2016-03-06 10:23:52
 
 import os
 import sys
@@ -148,7 +148,7 @@ def get_user():
 
     user = getpass.getuser()
     output, error = getOutputError(
-        'cd {} && git status'.format(get_dir_path()))
+        'cd {0} && git status'.format(get_dir_path()))
 
     if not error:
         output, error = getOutputError('git config --get user.name')
@@ -611,9 +611,9 @@ class FileHeaderListener(sublime_plugin.EventListener):
                         break
 
                 for r in '.^$*+?{}[]()':
-                    line_head = line_head.replace(r, '\\{}'.format(r))
+                    line_head = line_head.replace(r, '\\{0}'.format(r))
 
-                line_pattern = '{}.*\n'.format(line_head)
+                line_pattern = '{0}.*\n'.format(line_head)
                 break
 
         if line_pattern is not None:
@@ -633,7 +633,7 @@ class FileHeaderListener(sublime_plugin.EventListener):
                 elif what == FILE_PATH:
                     strings = get_file_path(view.file_name())
 
-                strings = '{}{}{}'.format(
+                strings = '{0}{1}{2}'.format(
                     ' ' * (index - space_start), strings, line_tail)
 
                 region = sublime.Region(int(a), int(b))
