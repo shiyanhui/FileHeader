@@ -50,7 +50,7 @@ Create a new file
 
 - Sidebar Menu
 
-  .. image:: https://raw.github.com/shiyanhui/shiyanhui.github.io/master/images/FileHeader/new-file.gif
+  .. image:: https://raw.github.com/shiyanhui/FileHeader/master/doc/img/new-file.gif
 
 - Shortcuts
 
@@ -65,7 +65,7 @@ Add header to an existed file
 
 - Sidebar Menu
 
-  .. image:: https://raw.github.com/shiyanhui/shiyanhui.github.io/master/images/FileHeader/add-header.gif
+  .. image:: https://raw.github.com/shiyanhui/FileHeader/master/doc/img/add-header.gif
 
 - Shortcuts
 
@@ -81,14 +81,14 @@ Add header to files in the specified directory
 
 - Sidebar Menu
 
-  .. image:: https://raw.github.com/shiyanhui/shiyanhui.github.io/master/images/FileHeader/add-header-dir.gif
+  .. image:: https://raw.github.com/shiyanhui/FileHeader/master/doc/img/add-header-dir.gif
 
 A very important feature of FileHeader is that it can automatically update
 **last_modified_time** and **last_modified_by** (see options below). Just look
 this picture, take care of the **@Last modified time:** before save and after
 save:
 
-.. image:: https://raw.github.com/shiyanhui/shiyanhui.github.io/master/images/FileHeader/update.gif
+.. image:: https://raw.github.com/shiyanhui/FileHeader/master/doc/img/update.gif
 
 Settings
 ========
