@@ -2,7 +2,7 @@
 # @Author: Lime
 # @Date:   2013-10-28 13:39:48
 # @Last Modified by:   qkdreyer
-# @Last Modified time: 2017-08-13 15:06:03
+# @Last Modified time: 2017-08-14 16:48:32
 
 import os
 import sys
@@ -351,8 +351,10 @@ def get_syntax_type(name):
     '''Judge `syntax_type` according to to `name`'''
 
     syntax_type = Settings().get('syntax_when_not_match')
-    file_suffix_mapping = merge_defaults_with_settings(FILE_SUFFIX_MAPPING, 'file_suffix_mapping')
-    extension_equivalence = merge_defaults_with_settings(EXTENSION_EQUIVALENCE, 'extension_equivalence')
+    file_suffix_mapping = merge_defaults_with_settings(
+        FILE_SUFFIX_MAPPING, 'file_suffix_mapping')
+    extension_equivalence = merge_defaults_with_settings(
+        EXTENSION_EQUIVALENCE, 'extension_equivalence')
 
     if name is not None:
         name = name.split('.')
@@ -382,9 +384,14 @@ def get_syntax_file(syntax_type):
     if syntax_type == 'C':
         syntax_type = 'C++'
 
-    lang2tmL = merge_defaults_with_settings(LANGUAGE_SYNTAX_MAPPING, 'language_syntax_mapping')
+    lang2tmL = merge_defaults_with_settings(
+        LANGUAGE_SYNTAX_MAPPING, 'language_syntax_mapping')
     tmL = lang2tmL.get(syntax_type, syntax_type)
-    return 'Packages/%s/%s.tmLanguage' % (syntax_type, tmL)
+
+    if not '.' in tmL:
+        tmL += '.tmLanguage'
+
+    return 'Packages/%s/%s' % (syntax_type, tmL)
 
 
 def get_content_index(haystack, needle):
@@ -395,7 +402,8 @@ def get_content_index(haystack, needle):
 
 def get_header_prefix(syntax_type, default=''):
     '''Get the header prefix'''
-    header_prefix_mapping = merge_defaults_with_settings(HEADER_PREFIX_MAPPING, 'header_prefix_mapping')
+    header_prefix_mapping = merge_defaults_with_settings(
+        HEADER_PREFIX_MAPPING, 'header_prefix_mapping')
     try:
         return header_prefix_mapping.get(syntax_type, default)
     except KeyError:
@@ -405,7 +413,8 @@ def get_header_prefix(syntax_type, default=''):
 def get_header_content(syntax_type, path=None, file=None):
     '''Get the correctly computed header content'''
     header_prefix = get_header_prefix(syntax_type)
-    content = '' if isinstance(file, str) and header_prefix in file else header_prefix
+    content = '' if isinstance(
+        file, str) and header_prefix in file else header_prefix
     return content + render_template(syntax_type, 'header', {'path': path})
 
 
@@ -419,7 +428,8 @@ def get_file_content(file, syntax_type, header):
 def template_header_exists(file, syntax_type):
     '''Return whether template header has been compiled in file'''
     template_header = get_template_part(syntax_type, 'header').strip()
-    return re.search(re.sub(r'\\{\\{[a-z\\_]+\\}\\}', '.*', re.escape(template_header)), file)
+    regex = r'\\{\\{[a-z\\_]+\\}\\}'
+    return re.search(re.sub(regex, '.*', re.escape(template_header)), file)
 
 
 def merge_dicts(*dicts):
@@ -537,7 +547,8 @@ class BackgroundAddHeaderThread(threading.Thread):
                 file = f.read()
 
             if not template_header_exists(file, syntax_type):
-                header_content = get_header_content(syntax_type, self.path, file)
+                header_content = get_header_content(
+                    syntax_type, self.path, file)
                 contents = get_file_content(file, syntax_type, header_content)
                 with open(self.path, 'w') as f:
                     f.write(contents)
@@ -563,7 +574,8 @@ class AddFileHeaderCommand(sublime_plugin.TextCommand):
         view_content = view.substr(sublime.Region(0, view.size()))
 
         if not template_header_exists(view_content, syntax_type):
-            header_content = get_header_content(syntax_type, path, view_content)
+            header_content = get_header_content(
+                syntax_type, path, view_content)
             header_prefix = get_header_prefix(syntax_type)
             view_index = get_content_index(view_content, header_prefix)
             self.view.insert(edit, view_index, header_content)
@@ -788,7 +800,8 @@ class FileHeaderListener(sublime_plugin.EventListener):
                 view.run_command('undo')
 
     def on_pre_save(self, view):
-        enable_add_template_on_save = Settings().get('enable_add_template_on_save', False)
+        enable_add_template_on_save = Settings().get(
+            'enable_add_template_on_save', False)
         file_name = view.file_name()
 
         if isinstance(enable_add_template_on_save, str):
@@ -796,7 +809,8 @@ class FileHeaderListener(sublime_plugin.EventListener):
             enable_add_template_on_save = search != None
 
         if enable_add_template_on_save:
-            block(view, view.run_command, 'add_file_header', {'path': file_name})
+            block(view, view.run_command,
+                  'add_file_header', {'path': file_name})
 
         if view.id() in FileHeaderListener.new_view_id:
             if not enable_add_template_on_save:
