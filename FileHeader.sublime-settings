@@ -19,6 +19,11 @@
     */
     "custom_time_format": "",
     /*
+    Whether add template on save. Can be either a boolean or a regex which will
+    be searched against the file name
+    */
+    "enable_add_template_on_save": false,
+    /*
     Whether add template to the empty file.
 
     It's useful when you create new file through other command, for
@@ -79,55 +84,29 @@
     FileHeader will set language as **syntax_when_not_match** above.
     */
     "file_suffix_mapping": {
-        "as": "ActionScript",
-        "scpt": "AppleScript",
-        "asp": "ASP",
-        "aspx": "ASP",
-        "bat": "Batch File",
-        "cmd": "Batch File",
-        "c": "C",
-        "cs": "C#",
-        "cpp": "C++",
-        "clj": "Clojure",
-        "css": "CSS",
-        "D": "D",
-        "erl": "Erlang",
-        "go": "Go",
-        "groovy": "Groovy",
-        "hs": "Haskell",
-        "htm": "HTML",
-        "html": "HTML",
-        "java": "Java",
-        "js": "JavaScript",
-        "tex": "LaTeX",
-        "lsp": "Lisp",
-        "lua": "Lua",
-        "md": "Markdown",
-        "mat": "Matlab",
-        "m": "Objective-C",
-        "ml": "OCaml",
-        "p": "Pascal",
-        "pl": "Perl",
-        "php": "PHP",
-        "py": "Python",
-        "R": "R",
-        "rst": "RestructuredText",
-        "rb": "Ruby",
-        "scala": "Scala",
-        "scss": "SCSS",
-        "sh": "ShellScript",
-        "sql": "SQL",
-        "tcl": "TCL",
-        "txt": "Text",
-        "xml": "XML"
+
+    },
+    /*
+    FileHeader will handle header prefix according to programming language.
+    You can add more header prefix here. Note: language should be one of
+    that under **Default**.
+    */
+    "header_prefix_mapping": {
+
+    },
+    /*
+    Set special language syntax mapping, in case of syntax mapping file name
+    differs from programming language name file name
+    */
+    "language_syntax_mapping": {
+
     },
     /*
     Set special file suffix equivalence. Take `blade.php` for example,
     FileHeader will initial file with suffix `blade.php` with that of `html`.
-
     */
     "extension_equivalence": {
-        "blade.php": "html"
+
     },
 
     /*

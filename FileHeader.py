@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 # @Author: Lime
 # @Date:   2013-10-28 13:39:48
-# @Last Modified by:   Lime
-# @Last Modified time: 2016-03-06 10:23:52
+# @Last Modified by:   qkdreyer
+# @Last Modified time: 2017-08-14 16:48:32
 
 import os
 import sys
@@ -27,6 +27,66 @@ PLUGIN_PATH = os.path.join(PACKAGES_PATH, PLUGIN_NAME)
 HEADER_PATH = os.path.join(PLUGIN_PATH, 'template/header')
 BODY_PATH = os.path.join(PLUGIN_PATH, 'template/body')
 INSTALLED_PLGIN_PATH = os.path.abspath(os.path.dirname(__file__))
+
+FILE_SUFFIX_MAPPING = {
+    "as": "ActionScript",
+    "scpt": "AppleScript",
+    "asp": "ASP",
+    "aspx": "ASP",
+    "bat": "Batch File",
+    "cmd": "Batch File",
+    "c": "C",
+    "cs": "C#",
+    "cpp": "C++",
+    "clj": "Clojure",
+    "css": "CSS",
+    "D": "D",
+    "erl": "Erlang",
+    "go": "Go",
+    "groovy": "Groovy",
+    "hs": "Haskell",
+    "htm": "HTML",
+    "html": "HTML",
+    "java": "Java",
+    "js": "JavaScript",
+    "tex": "LaTeX",
+    "lsp": "Lisp",
+    "lua": "Lua",
+    "md": "Markdown",
+    "mat": "Matlab",
+    "m": "Objective-C",
+    "ml": "OCaml",
+    "p": "Pascal",
+    "pl": "Perl",
+    "php": "PHP",
+    "py": "Python",
+    "R": "R",
+    "rst": "RestructuredText",
+    "rb": "Ruby",
+    "scala": "Scala",
+    "scss": "SCSS",
+    "sh": "ShellScript",
+    "sql": "SQL",
+    "tcl": "TCL",
+    "txt": "Text",
+    "xml": "XML"
+}
+
+HEADER_PREFIX_MAPPING = {
+    "PHP": "<?php\n\n"
+}
+
+EXTENSION_EQUIVALENCE = {
+    "blade.php": "html"
+}
+
+LANGUAGE_SYNTAX_MAPPING = {
+    'Graphviz': 'DOT',
+    'RestructuredText': 'reStructuredText',
+    'ShellScript': 'Shell-Unix-Generic',
+    'TCL': 'Tcl',
+    'Text': 'Plain text'
+}
 
 IS_ST3 = sublime.version() >= '3'
 
@@ -83,6 +143,12 @@ def getOutputError(cmd):
     return map(str.strip, subprocess.Popen(
         cmd, shell=True, universal_newlines=True,
         stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate())
+
+
+def View():
+    '''Get current active window view'''
+
+    return Window().active_view()
 
 
 def Window():
@@ -160,7 +226,7 @@ def get_user():
 def get_project_name():
     '''Get project name'''
 
-    project_data = sublime.active_window().project_data()
+    project_data = Window().project_data()
     project = os.path.basename(
         project_data['folders'][0]['path']) if project_data else None
 
@@ -170,7 +236,7 @@ def get_project_name():
 def get_dir_path():
     '''Get current file dir path'''
 
-    view, path = Window().active_view(), None
+    view, path = View(), None
     if view:
         file_name = view.file_name()
         if file_name is not None:
@@ -285,8 +351,10 @@ def get_syntax_type(name):
     '''Judge `syntax_type` according to to `name`'''
 
     syntax_type = Settings().get('syntax_when_not_match')
-    file_suffix_mapping = Settings().get('file_suffix_mapping')
-    extension_equivalence = Settings().get('extension_equivalence')
+    file_suffix_mapping = merge_defaults_with_settings(
+        FILE_SUFFIX_MAPPING, 'file_suffix_mapping')
+    extension_equivalence = merge_defaults_with_settings(
+        EXTENSION_EQUIVALENCE, 'extension_equivalence')
 
     if name is not None:
         name = name.split('.')
@@ -312,19 +380,69 @@ def get_syntax_type(name):
 def get_syntax_file(syntax_type):
     '''Get syntax file path'''
 
-    lang2tmL = {
-        'Graphviz': 'DOT',
-        'RestructuredText': 'reStructuredText',
-        'ShellScript': 'Shell-Unix-Generic',
-        'TCL': 'Tcl',
-        'Text': 'Plain text',
-    }
-
+    # weird workaround
     if syntax_type == 'C':
         syntax_type = 'C++'
 
+    lang2tmL = merge_defaults_with_settings(
+        LANGUAGE_SYNTAX_MAPPING, 'language_syntax_mapping')
     tmL = lang2tmL.get(syntax_type, syntax_type)
-    return 'Packages/%s/%s.tmLanguage' % (syntax_type, tmL)
+
+    if not '.' in tmL:
+        tmL += '.tmLanguage'
+
+    return 'Packages/%s/%s' % (syntax_type, tmL)
+
+
+def get_content_index(haystack, needle):
+    '''Get the right needle position in haystack'''
+    pos = haystack.find(needle)
+    return pos + len(needle) if pos >= 0 else 0
+
+
+def get_header_prefix(syntax_type, default=''):
+    '''Get the header prefix'''
+    header_prefix_mapping = merge_defaults_with_settings(
+        HEADER_PREFIX_MAPPING, 'header_prefix_mapping')
+    try:
+        return header_prefix_mapping.get(syntax_type, default)
+    except KeyError:
+        return default
+
+
+def get_header_content(syntax_type, path=None, file=None):
+    '''Get the correctly computed header content'''
+    header_prefix = get_header_prefix(syntax_type)
+    content = '' if isinstance(
+        file, str) and header_prefix in file else header_prefix
+    return content + render_template(syntax_type, 'header', {'path': path})
+
+
+def get_file_content(file, syntax_type, header):
+    '''Get the correctly computed file content'''
+    header_prefix = get_header_prefix(syntax_type)
+    file_index = get_content_index(file, header_prefix)
+    return file[0:file_index] + header + file[file_index:]
+
+
+def template_header_exists(file, syntax_type):
+    '''Return whether template header has been compiled in file'''
+    template_header = get_template_part(syntax_type, 'header').strip()
+    regex = r'\\{\\{[a-z\\_]+\\}\\}'
+    return re.search(re.sub(regex, '.*', re.escape(template_header)), file)
+
+
+def merge_dicts(*dicts):
+    '''Merge any number of dicts into a new dict'''
+    result = {}
+    for dict in dicts:
+        result.update(dict)
+    return result
+
+
+def merge_defaults_with_settings(default, setting_name):
+    '''Merge default dict with package settings'''
+    return merge_dicts(default, Settings().get(setting_name, {}))
 
 
 def block(view, callback, *args, **kwargs):
@@ -347,7 +465,7 @@ class FileHeaderNewFileCommand(sublime_plugin.WindowCommand):
             sublime.error_message('File exists!')
             return
 
-        header = render_template(syntax_type, options={'path': path})
+        header = get_header_content(syntax_type, path)
 
         try:
             with open(path, 'w+') as f:
@@ -357,18 +475,19 @@ class FileHeaderNewFileCommand(sublime_plugin.WindowCommand):
             sublime.error_message(str(e))
             return
 
-        new_file = Window().open_file(path)
+        view = Window().open_file(path)
+        file_syntax = get_syntax_file(syntax_type)
 
-        try:
-            block(new_file,
-                  new_file.set_syntax_file, get_syntax_file(syntax_type))
-        except:
-            pass
+        if os.path.exists(file_syntax) and os.path.isfile(file_syntax):
+            try:
+                block(view, view.set_syntax_file, file_syntax)
+            except:
+                pass
 
-        block(new_file, new_file.show, 0)
+        block(view, view.show, 0)
 
     def new_view(self, syntax_type, name):
-        header = render_template(syntax_type)
+        header = get_header_content(syntax_type)
         new_file = Window().new_file()
         new_file.set_name(name)
         new_file.run_command('insert', {'characters': header})
@@ -422,14 +541,17 @@ class BackgroundAddHeaderThread(threading.Thread):
 
     def run(self):
         syntax_type = get_syntax_type(self.path)
-        header = render_template(syntax_type, 'header', {'path': self.path})
 
         try:
             with open(self.path, 'r') as f:
-                contents = header + f.read()
+                file = f.read()
 
-            with open(self.path, 'w') as f:
-                f.write(contents)
+            if not template_header_exists(file, syntax_type):
+                header_content = get_header_content(
+                    syntax_type, self.path, file)
+                contents = get_file_content(file, syntax_type, header_content)
+                with open(self.path, 'w') as f:
+                    f.write(contents)
 
         except Exception as e:
             sublime.error_message(str(e))
@@ -448,8 +570,15 @@ class AddFileHeaderCommand(sublime_plugin.TextCommand):
                 c_time = pickle.loads(str(c_time))
                 options.update({'c_time': c_time})
 
-        header = render_template(syntax_type, part, options)
-        self.view.insert(edit, 0, header)
+        view = View()
+        view_content = view.substr(sublime.Region(0, view.size()))
+
+        if not template_header_exists(view_content, syntax_type):
+            header_content = get_header_content(
+                syntax_type, path, view_content)
+            header_prefix = get_header_prefix(syntax_type)
+            view_index = get_content_index(view_content, header_prefix)
+            self.view.insert(edit, view_index, header_content)
 
 
 class FileHeaderAddHeaderCommand(sublime_plugin.WindowCommand):
@@ -509,7 +638,6 @@ class FileHeaderAddHeaderCommand(sublime_plugin.WindowCommand):
 
         whether_open_file = Settings().get(
             'open_file_when_add_header_to_directory')
-
         if whether_open_file:
             modified_file = Window().open_file(path)
             block(modified_file, modified_file.run_command,
@@ -548,7 +676,7 @@ class FileHeaderAddHeaderCommand(sublime_plugin.WindowCommand):
             initial_text = os.path.abspath(paths[0])
         else:
             try:
-                initial_text = Window().active_view().file_name()
+                initial_text = View().file_name() or 'untitled'
             except:
                 pass
 
@@ -672,8 +800,21 @@ class FileHeaderListener(sublime_plugin.EventListener):
                 view.run_command('undo')
 
     def on_pre_save(self, view):
+        enable_add_template_on_save = Settings().get(
+            'enable_add_template_on_save', False)
+        file_name = view.file_name()
+
+        if isinstance(enable_add_template_on_save, str):
+            search = re.search(enable_add_template_on_save, file_name)
+            enable_add_template_on_save = search != None
+
+        if enable_add_template_on_save:
+            block(view, view.run_command,
+                  'add_file_header', {'path': file_name})
+
         if view.id() in FileHeaderListener.new_view_id:
-            self.insert_template(view, False)
+            if not enable_add_template_on_save:
+                self.insert_template(view, False)
             index = FileHeaderListener.new_view_id.index(view.id())
             del FileHeaderListener.new_view_id[index]
         else:
