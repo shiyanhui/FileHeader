@@ -140,6 +140,16 @@
 
             Can be set custom.
 
+        - email
+
+            Author's email
+
+            FileHeader will set it automatically. If it's in
+            a git repository and the `user.email` has been set, `autor`
+            will set to `user.email`, otherwise it will be set to `None`.
+
+            Can be set custom.
+
         - last_modified_by
 
             The file last modified by who? It is specially useful when

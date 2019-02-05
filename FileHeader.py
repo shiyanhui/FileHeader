@@ -225,6 +225,22 @@ def get_author():
     return author
 
 
+def get_email():
+    '''Get email'''
+
+    email = None
+
+    prefix = 'cd %s && git ' % get_dir_path()
+
+    output, error = getOutputError(prefix + 'status')
+
+    if not error:
+        output, error = getOutputError(prefix + 'config --get user.email')
+        if not error and output:
+            email = output
+    return email
+
+
 def get_project_name():
     '''Get project name'''
 
@@ -331,6 +347,10 @@ def get_args(syntax_type, options={}):
         args.update({'author': author})
     if 'last_modified_by' not in args:
         args.update({'last_modified_by': author})
+
+    email = get_email()
+    if 'email' not in args:
+        args.update({'email': email})
 
     return args
 
