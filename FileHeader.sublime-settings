@@ -145,7 +145,7 @@
             Author's email
 
             FileHeader will set it automatically. If it's in
-            a git repository and the `user.email` has been set, `autor`
+            a git repository and the `user.email` has been set, `email`
             will set to `user.email`, otherwise it will be set to `None`.
 
             Can be set custom.
@@ -202,11 +202,6 @@
 
             Can't be set custom.
         */
-
-        /*
-        Email
-        */
-        "email": "email@example.com"
 
         // You can add more here......
     },
